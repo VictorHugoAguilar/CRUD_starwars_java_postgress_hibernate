@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+  <table-filter match-schema="public" match-name="films"/>
+  <table-filter match-schema="public" match-name="films_people"/>
+  <table-filter match-schema="public" match-name="films_planets"/>
+  <table-filter match-schema="public" match-name="people"/>
+  <table-filter match-schema="public" match-name="planets"/>
+  <table-filter match-schema="public" match-name="species"/>
+  <table-filter match-schema="public" match-name="species_people"/>
+  <table-filter match-schema="public" match-name="starships"/>
+  <table-filter match-schema="public" match-name="starships_films"/>
+  <table-filter match-schema="public" match-name="starships_people"/>
+  <table-filter match-schema="public" match-name="vehicles"/>
+  <table-filter match-schema="public" match-name="vehicles_films"/>
+  <table-filter match-schema="public" match-name="vehicles_people"/>
+</hibernate-reverse-engineering>
