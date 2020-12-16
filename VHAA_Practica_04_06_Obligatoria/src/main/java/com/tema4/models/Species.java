@@ -1,13 +1,12 @@
 package com.tema4.models;
-// Generated 15 dic. 2020 17:38:37 by Hibernate Tools 5.2.12.Final
 
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -23,52 +22,19 @@ import javax.persistence.Table;
 public class Species implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigo", unique = true, nullable = false)
 	private int codigo;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "homeworld")
 	private Planets planets;
-
-	@Column(name = "name", length = 100)
 	private String name;
-
-	@Column(name = "classification", length = 100)
 	private String classification;
-
-	@Column(name = "designation", length = 100)
 	private String designation;
-
-	@Column(name = "average_height", length = 100)
 	private String averageHeight;
-
-	@Column(name = "average_lifespan", length = 100)
 	private String averageLifespan;
-
-	@Column(name = "eye_colors", length = 100)
 	private String eyeColors;
-
-	@Column(name = "hair_colors", length = 100)
 	private String hairColors;
-
-	@Column(name = "skin_colors", length = 100)
 	private String skinColors;
-
-	@Column(name = "language", length = 100)
 	private String language;
-
-	@Column(name = "created", length = 100)
 	private String created;
-
-	@Column(name = "edited", length = 100)
 	private String edited;
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "species_people", joinColumns = {
-			@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
 	private Set<People> peoples = new HashSet<People>(0);
 
 	public Species() {
@@ -97,125 +63,135 @@ public class Species implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
+	@Id
+	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
-		return codigo;
+		return this.codigo;
 	}
 
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "homeworld")
 	public Planets getPlanets() {
-		return planets;
+		return this.planets;
 	}
 
 	public void setPlanets(Planets planets) {
 		this.planets = planets;
 	}
 
+	@Column(name = "name", length = 100)
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Column(name = "classification", length = 100)
 	public String getClassification() {
-		return classification;
+		return this.classification;
 	}
 
 	public void setClassification(String classification) {
 		this.classification = classification;
 	}
 
+	@Column(name = "designation", length = 100)
 	public String getDesignation() {
-		return designation;
+		return this.designation;
 	}
 
 	public void setDesignation(String designation) {
 		this.designation = designation;
 	}
 
+	@Column(name = "average_height", length = 100)
 	public String getAverageHeight() {
-		return averageHeight;
+		return this.averageHeight;
 	}
 
 	public void setAverageHeight(String averageHeight) {
 		this.averageHeight = averageHeight;
 	}
 
+	@Column(name = "average_lifespan", length = 100)
 	public String getAverageLifespan() {
-		return averageLifespan;
+		return this.averageLifespan;
 	}
 
 	public void setAverageLifespan(String averageLifespan) {
 		this.averageLifespan = averageLifespan;
 	}
 
+	@Column(name = "eye_colors", length = 100)
 	public String getEyeColors() {
-		return eyeColors;
+		return this.eyeColors;
 	}
 
 	public void setEyeColors(String eyeColors) {
 		this.eyeColors = eyeColors;
 	}
 
+	@Column(name = "hair_colors", length = 100)
 	public String getHairColors() {
-		return hairColors;
+		return this.hairColors;
 	}
 
 	public void setHairColors(String hairColors) {
 		this.hairColors = hairColors;
 	}
 
+	@Column(name = "skin_colors", length = 100)
 	public String getSkinColors() {
-		return skinColors;
+		return this.skinColors;
 	}
 
 	public void setSkinColors(String skinColors) {
 		this.skinColors = skinColors;
 	}
 
+	@Column(name = "language", length = 100)
 	public String getLanguage() {
-		return language;
+		return this.language;
 	}
 
 	public void setLanguage(String language) {
 		this.language = language;
 	}
 
+	@Column(name = "created", length = 100)
 	public String getCreated() {
-		return created;
+		return this.created;
 	}
 
 	public void setCreated(String created) {
 		this.created = created;
 	}
 
+	@Column(name = "edited", length = 100)
 	public String getEdited() {
-		return edited;
+		return this.edited;
 	}
 
 	public void setEdited(String edited) {
 		this.edited = edited;
 	}
 
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "species_people", joinColumns = {
+			@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
 	public Set<People> getPeoples() {
-		return peoples;
+		return this.peoples;
 	}
 
 	public void setPeoples(Set<People> peoples) {
 		this.peoples = peoples;
-	}
-
-	@Override
-	public String toString() {
-		return "Species [codigo=" + codigo + ", planets=" + planets + ", name=" + name + ", classification="
-				+ classification + ", designation=" + designation + ", averageHeight=" + averageHeight
-				+ ", averageLifespan=" + averageLifespan + ", eyeColors=" + eyeColors + ", hairColors=" + hairColors
-				+ ", skinColors=" + skinColors + ", language=" + language + ", created=" + created + ", edited="
-				+ edited + ", peoples=" + peoples + "]";
 	}
 
 }

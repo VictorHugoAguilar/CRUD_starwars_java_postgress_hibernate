@@ -1,13 +1,12 @@
 package com.tema4.models;
-// Generated 15 dic. 2020 17:38:37 by Hibernate Tools 5.2.12.Final
 
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -22,56 +21,24 @@ import javax.persistence.Table;
 @Table(name = "planets")
 public class Planets implements java.io.Serializable {
 
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigo", unique = true, nullable = false)
 	private int codigo;
-
-	@Column(name = "name", length = 100)
 	private String name;
-
-	@Column(name = "diameter", length = 100)
 	private String diameter;
-
-	@Column(name = "rotation_period", length = 100)
 	private String rotationPeriod;
-
-	@Column(name = "orbital_period", length = 100)
 	private String orbitalPeriod;
-
-	@Column(name = "gravity", length = 100)
 	private String gravity;
-
-	@Column(name = "population", length = 100)
 	private String population;
-
-	@Column(name = "climate", length = 100)
 	private String climate;
-
-	@Column(name = "terrain", length = 100)
 	private String terrain;
-
-	@Column(name = "surface_water", length = 100)
 	private String surfaceWater;
-
-	@Column(name = "created", length = 100)
 	private String created;
-
-	@Column(name = "edited", length = 100)
 	private String edited;
-
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planets")
 	private Set<Species> specieses = new HashSet<Species>(0);
-
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planets")
 	private Set<People> peoples = new HashSet<People>(0);
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "films_planets", joinColumns = {
-			@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
 	private Set<Films> filmses = new HashSet<Films>(0);
 
 	public Planets() {
@@ -101,133 +68,143 @@ public class Planets implements java.io.Serializable {
 		this.filmses = filmses;
 	}
 
+	@Id
+	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
-		return codigo;
+		return this.codigo;
 	}
 
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
 
+	@Column(name = "name", length = 100)
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Column(name = "diameter", length = 100)
 	public String getDiameter() {
-		return diameter;
+		return this.diameter;
 	}
 
 	public void setDiameter(String diameter) {
 		this.diameter = diameter;
 	}
 
+	@Column(name = "rotation_period", length = 100)
 	public String getRotationPeriod() {
-		return rotationPeriod;
+		return this.rotationPeriod;
 	}
 
 	public void setRotationPeriod(String rotationPeriod) {
 		this.rotationPeriod = rotationPeriod;
 	}
 
+	@Column(name = "orbital_period", length = 100)
 	public String getOrbitalPeriod() {
-		return orbitalPeriod;
+		return this.orbitalPeriod;
 	}
 
 	public void setOrbitalPeriod(String orbitalPeriod) {
 		this.orbitalPeriod = orbitalPeriod;
 	}
 
+	@Column(name = "gravity", length = 100)
 	public String getGravity() {
-		return gravity;
+		return this.gravity;
 	}
 
 	public void setGravity(String gravity) {
 		this.gravity = gravity;
 	}
 
+	@Column(name = "population", length = 100)
 	public String getPopulation() {
-		return population;
+		return this.population;
 	}
 
 	public void setPopulation(String population) {
 		this.population = population;
 	}
 
+	@Column(name = "climate", length = 100)
 	public String getClimate() {
-		return climate;
+		return this.climate;
 	}
 
 	public void setClimate(String climate) {
 		this.climate = climate;
 	}
 
+	@Column(name = "terrain", length = 100)
 	public String getTerrain() {
-		return terrain;
+		return this.terrain;
 	}
 
 	public void setTerrain(String terrain) {
 		this.terrain = terrain;
 	}
 
+	@Column(name = "surface_water", length = 100)
 	public String getSurfaceWater() {
-		return surfaceWater;
+		return this.surfaceWater;
 	}
 
 	public void setSurfaceWater(String surfaceWater) {
 		this.surfaceWater = surfaceWater;
 	}
 
+	@Column(name = "created", length = 100)
 	public String getCreated() {
-		return created;
+		return this.created;
 	}
 
 	public void setCreated(String created) {
 		this.created = created;
 	}
 
+	@Column(name = "edited", length = 100)
 	public String getEdited() {
-		return edited;
+		return this.edited;
 	}
 
 	public void setEdited(String edited) {
 		this.edited = edited;
 	}
 
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planets")
 	public Set<Species> getSpecieses() {
-		return specieses;
+		return this.specieses;
 	}
 
 	public void setSpecieses(Set<Species> specieses) {
 		this.specieses = specieses;
 	}
 
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "planets")
 	public Set<People> getPeoples() {
-		return peoples;
+		return this.peoples;
 	}
 
 	public void setPeoples(Set<People> peoples) {
 		this.peoples = peoples;
 	}
 
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "films_planets", joinColumns = {
+			@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
 	public Set<Films> getFilmses() {
-		return filmses;
+		return this.filmses;
 	}
 
 	public void setFilmses(Set<Films> filmses) {
 		this.filmses = filmses;
-	}
-
-	@Override
-	public String toString() {
-		return "Planets [codigo=" + codigo + ", name=" + name + ", diameter=" + diameter + ", rotationPeriod="
-				+ rotationPeriod + ", orbitalPeriod=" + orbitalPeriod + ", gravity=" + gravity + ", population="
-				+ population + ", climate=" + climate + ", terrain=" + terrain + ", surfaceWater=" + surfaceWater
-				+ ", created=" + created + ", edited=" + edited + ", specieses=" + specieses + ", peoples=" + peoples
-				+ ", filmses=" + filmses + "]";
 	}
 
 }

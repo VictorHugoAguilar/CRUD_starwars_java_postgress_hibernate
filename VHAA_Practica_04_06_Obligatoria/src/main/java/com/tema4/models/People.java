@@ -1,13 +1,12 @@
 package com.tema4.models;
-// Generated 15 dic. 2020 17:38:37 by Hibernate Tools 5.2.12.Final
 
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -22,70 +21,26 @@ import javax.persistence.Table;
 @Table(name = "people")
 public class People implements java.io.Serializable {
 
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigo", unique = true, nullable = false)
 	private int codigo;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "homeworld")
 	private Planets planets;
-
-	@Column(name = "name", length = 100)
 	private String name;
-
-	@Column(name = "birth_year", length = 100)
 	private String birthYear;
-
-	@Column(name = "eye_color", length = 100)
 	private String eyeColor;
-
-	@Column(name = "gender", length = 100)
 	private String gender;
-
-	@Column(name = "hair_color", length = 100)
 	private String hairColor;
-
-	@Column(name = "height", length = 100)
 	private String height;
-
-	@Column(name = "mass", length = 100)
 	private String mass;
-
-	@Column(name = "skin_color", length = 100)
 	private String skinColor;
-
-	@Column(name = "created", length = 100)
 	private String created;
-
-	@Column(name = "edited", length = 100)
 	private String edited;
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "starships_people", joinColumns = {
-			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) })
-	private Set<Starships> starships = new HashSet<Starships>(0);
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "species_people", joinColumns = {
-			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) })
-	private Set<Species> species = new HashSet<Species>(0);
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "vehicles_people", joinColumns = {
-			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) })
-	private Set<Vehicles> vehicles = new HashSet<Vehicles>(0);
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "films_people", joinColumns = {
-			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
-	private Set<Films> films = new HashSet<Films>(0);
+	private Set<Starships> starshipses = new HashSet<Starships>(0);
+	private Set<Species> specieses = new HashSet<Species>(0);
+	private Set<Vehicles> vehicleses = new HashSet<Vehicles>(0);
+	private Set<Films> filmses = new HashSet<Films>(0);
 
 	public People() {
 	}
@@ -96,7 +51,7 @@ public class People implements java.io.Serializable {
 
 	public People(int codigo, Planets planets, String name, String birthYear, String eyeColor, String gender,
 			String hairColor, String height, String mass, String skinColor, String created, String edited,
-			Set<Starships> starships, Set<Species> species, Set<Vehicles> vehicles, Set<Films> films) {
+			Set<Starships> starshipses, Set<Species> specieses, Set<Vehicles> vehicleses, Set<Films> filmses) {
 		this.codigo = codigo;
 		this.planets = planets;
 		this.name = name;
@@ -109,146 +64,317 @@ public class People implements java.io.Serializable {
 		this.skinColor = skinColor;
 		this.created = created;
 		this.edited = edited;
-		this.starships = starships;
-		this.species = species;
-		this.vehicles = vehicles;
-		this.films = films;
+		this.starshipses = starshipses;
+		this.specieses = specieses;
+		this.vehicleses = vehicleses;
+		this.filmses = filmses;
 	}
 
+	@Id
+	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
-		return codigo;
+		return this.codigo;
 	}
 
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "homeworld")
 	public Planets getPlanets() {
-		return planets;
+		return this.planets;
 	}
 
 	public void setPlanets(Planets planets) {
 		this.planets = planets;
 	}
 
+	@Column(name = "name", length = 100)
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Column(name = "birth_year", length = 100)
 	public String getBirthYear() {
-		return birthYear;
+		return this.birthYear;
 	}
 
 	public void setBirthYear(String birthYear) {
 		this.birthYear = birthYear;
 	}
 
+	@Column(name = "eye_color", length = 100)
 	public String getEyeColor() {
-		return eyeColor;
+		return this.eyeColor;
 	}
 
 	public void setEyeColor(String eyeColor) {
 		this.eyeColor = eyeColor;
 	}
 
+	@Column(name = "gender", length = 100)
 	public String getGender() {
-		return gender;
+		return this.gender;
 	}
 
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
 
+	@Column(name = "hair_color", length = 100)
 	public String getHairColor() {
-		return hairColor;
+		return this.hairColor;
 	}
 
 	public void setHairColor(String hairColor) {
 		this.hairColor = hairColor;
 	}
 
+	@Column(name = "height", length = 100)
 	public String getHeight() {
-		return height;
+		return this.height;
 	}
 
 	public void setHeight(String height) {
 		this.height = height;
 	}
 
+	@Column(name = "mass", length = 100)
 	public String getMass() {
-		return mass;
+		return this.mass;
 	}
 
 	public void setMass(String mass) {
 		this.mass = mass;
 	}
 
+	@Column(name = "skin_color", length = 100)
 	public String getSkinColor() {
-		return skinColor;
+		return this.skinColor;
 	}
 
 	public void setSkinColor(String skinColor) {
 		this.skinColor = skinColor;
 	}
 
+	@Column(name = "created", length = 100)
 	public String getCreated() {
-		return created;
+		return this.created;
 	}
 
 	public void setCreated(String created) {
 		this.created = created;
 	}
 
+	@Column(name = "edited", length = 100)
 	public String getEdited() {
-		return edited;
+		return this.edited;
 	}
 
 	public void setEdited(String edited) {
 		this.edited = edited;
 	}
 
-	public Set<Starships> getStarships() {
-		return starships;
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "starships_people", joinColumns = {
+			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) })
+	public Set<Starships> getStarshipses() {
+		return this.starshipses;
 	}
 
-	public void setStarships(Set<Starships> starships) {
-		this.starships = starships;
+	public void setStarshipses(Set<Starships> starshipses) {
+		this.starshipses = starshipses;
 	}
 
-	public Set<Species> getSpecies() {
-		return species;
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Species.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "species_people", joinColumns = {
+			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) })
+	public Set<Species> getSpecieses() {
+		return this.specieses;
 	}
 
-	public void setSpecies(Set<Species> species) {
-		this.species = species;
+	public void setSpecieses(Set<Species> specieses) {
+		this.specieses = specieses;
 	}
 
-	public Set<Vehicles> getVehicles() {
-		return vehicles;
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "vehicles_people", joinColumns = {
+			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) })
+	public Set<Vehicles> getVehicleses() {
+		return this.vehicleses;
 	}
 
-	public void setVehicles(Set<Vehicles> vehicles) {
-		this.vehicles = vehicles;
+	public void setVehicleses(Set<Vehicles> vehicleses) {
+		this.vehicleses = vehicleses;
 	}
 
-	public Set<Films> getFilms() {
-		return films;
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.ALL)
+	@JoinTable(name = "films_people", joinColumns = {
+			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
+	public Set<Films> getFilmses() {
+		return this.filmses;
 	}
 
-	public void setFilms(Set<Films> films) {
-		this.films = films;
+	public void setFilmses(Set<Films> filmses) {
+		this.filmses = filmses;
 	}
 
-	@Override
-	public String toString() {
-		return "People [codigo=" + codigo + ", planets=" + planets + ", name=" + name + ", birthYear=" + birthYear
-				+ ", eyeColor=" + eyeColor + ", gender=" + gender + ", hairColor=" + hairColor + ", height=" + height
-				+ ", mass=" + mass + ", skinColor=" + skinColor + ", created=" + created + ", edited=" + edited
-				+ ", starships=" + starships + ", species=" + species + ", vehicles=" + vehicles + ", films=" + films
-				+ "]";
+	public void imprimeRegistroCodigoName() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()));
+		String name = getName().length() > 30 ? getName().substring(0, 27) + "..." : getName();
+		sb.append(String.format("%-30s", name));
+		System.out.println(sb.toString());
 	}
+
+	public void imprimeRegistroCompleto() {
+		StringBuilder sb = new StringBuilder();
+		Integer codigo = getCodigo();
+		sb.append(String.format("%-8s", codigo));
+		String nombre = getName().length() > 30 ? getName().substring(0, 27) + "..." : getName();
+		sb.append(String.format("%-30s", nombre));
+		String altura = getHeight();
+		sb.append(String.format("%-8s", altura));
+		String peso = getMass();
+		sb.append(String.format("%-8s", peso));
+		String pelo = getHairColor();
+		sb.append(String.format("%-14s", pelo));
+		String piel = getSkinColor();
+		sb.append(String.format("%-14s", piel));
+		String ojos = getEyeColor();
+		sb.append(String.format("%-14s", ojos));
+		String nacimiento = getBirthYear();
+		sb.append(String.format("%-14s", nacimiento));
+		String mundo = getPlanets().getName();
+		sb.append(String.format("%-15s", mundo));
+		String creado = getCreated();
+		sb.append(String.format("%-30s", creado));
+		String editado = getEdited();
+		sb.append(String.format("%-30s", editado));
+		String vehicles = "";
+		if (getVehicleses().isEmpty()) {
+			vehicles = "No conduce vehicles";
+		} else {
+			for (Vehicles vehicle : getVehicleses()) {
+				vehicles += vehicle.getName() + " ";
+			}
+		}
+		sb.append(vehicles);
+		String starships = "";
+		if (getStarshipses().isEmpty()) {
+			starships = "No conduce starships";
+		} else {
+			for (Starships st : getStarshipses()) {
+				starships += st.getName() + " ";
+			}
+		}
+		sb.append(starships);
+		String species = "";
+		if (getStarshipses().isEmpty()) {
+			species = "No tiene especie";
+		} else {
+			for (Species speci : getSpecieses()) {
+				species += speci.getName() + " ";
+			}
+		}
+		sb.append(species);
+		String films = "";
+		if (getFilmses().isEmpty()) {
+			species = "No ha participado en films";
+		} else {
+			for (Films film : getFilmses()) {
+				films += film.getTitle() + " ";
+			}
+		}
+		sb.append(films);
+
+		System.out.println(sb.toString());
+	}
+
+	public void imprimeRegistroDetallado() {
+		StringBuilder sb = new StringBuilder();
+		Integer codigo = getCodigo();
+		sb.append(String.format("%-16s", "Código: " + codigo));
+		String nombre = getName().length() > 30 ? getName().substring(0, 27) + "..." : getName();
+		sb.append(String.format("%-30s", "Nombre: " + nombre + "\n\nCarácteristicas Físicas\n"));
+		String altura = getHeight();
+		sb.append(String.format("%-40s", "Altura: " + altura));
+		String peso = getMass();
+		sb.append(String.format("%-40s", "Peso: " + peso));
+		String pelo = getHairColor();
+		sb.append(String.format("%-40s", "Color del Pelo: " + pelo));
+		sb.append("\n");
+		String piel = getSkinColor();
+		sb.append(String.format("%-40s", "Color de Piel: " + piel));
+		String ojos = getEyeColor();
+		sb.append(String.format("%-40s", "Color de Ojos: " + ojos));
+		sb.append("\n");
+		String nacimiento = getBirthYear();
+		sb.append(String.format("%-40s", "Año Nacimiento: " + nacimiento));
+		String mundo = getPlanets().getName();
+		sb.append(String.format("%-40s", "Mundo: " + mundo));
+
+		String species = "";
+		if (getSpecieses().isEmpty()) {
+			species = "No pertenece a ninguna especie";
+		} else {
+			for (Species speci : getSpecieses()) {
+				species += speci.getName() + " ";
+			}
+		}
+		sb.append("Especie: " + species);
+
+		sb.append("\n\nVehiculos\n");
+		String vehicles = "";
+		if (getVehicleses().isEmpty()) {
+			vehicles = "No conduce vehicles";
+		} else {
+			for (Vehicles vehicle : getVehicleses()) {
+				vehicles += vehicle.getName() + " ";
+			}
+		}
+		sb.append(vehicles);
+
+		sb.append("\n\nNaves\n");
+		String starships = "";
+		if (getStarshipses().isEmpty()) {
+			starships = "No conduce starships";
+		} else {
+			for (Starships st : getStarshipses()) {
+				starships += st.getName() + " ";
+			}
+		}
+		sb.append(starships);
+
+		sb.append("\n\nFilms en los que ha participado\n");
+		String films = "";
+		if (getFilmses().isEmpty()) {
+			films = "No ha participado en films";
+		} else {
+			for (Films film : getFilmses()) {
+				films += "Episodio: " + film.getEpisodeId() + " - ";
+				films += film.getTitle() + "\n";
+			}
+		}
+		sb.append(films);
+
+		sb.append("\n");
+		String creado = getCreated();
+		sb.append(String.format("%-50s", "Creado: " + creado));
+		sb.append("\n");
+		String editado = getEdited();
+		sb.append(String.format("%-50s", "Editado: " + editado));
+
+		System.out.println(sb.toString());
+	}
+
 }
