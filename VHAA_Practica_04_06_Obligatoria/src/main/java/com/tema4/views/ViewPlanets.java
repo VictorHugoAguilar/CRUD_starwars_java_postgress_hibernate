@@ -22,6 +22,7 @@ public class ViewPlanets {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
+				ViewConsultaPlanets.getInstance();
 				break;
 			case "2":
 				break;

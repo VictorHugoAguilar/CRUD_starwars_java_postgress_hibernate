@@ -194,4 +194,89 @@ public class Species implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
+	public void imprimeRegistro() {
+		StringBuilder sb = new StringBuilder();
+		int codigo = getCodigo();
+		sb.append(String.format("%-8s", codigo));
+		String name = getName().trim().length() > 15 ? getName().substring(1, 15) + "..." : getName();
+		sb.append(String.format("%-20s", name));
+		String designacion = getDesignation();
+		sb.append(String.format("%-20s", designacion));
+		String alturaPromedio = getAverageHeight().equalsIgnoreCase("n/a")
+				|| getAverageHeight().equalsIgnoreCase("unknown") ? "desconocida" : getAverageHeight();
+		sb.append(String.format("%-20s", alturaPromedio));
+		String esperanzaVida = getAverageLifespan().equalsIgnoreCase("unknown") ? "desconocida" : getAverageLifespan();
+		sb.append(String.format("%-20s", esperanzaVida));
+		String lenguaje = getLanguage().equalsIgnoreCase("n/a") ? "desconocido" : getLanguage();
+		sb.append(String.format("%-20s", lenguaje));
+		String mundo = getPlanets() == null ? "desconocido" : getPlanets().getName();
+		sb.append(String.format("%-20s", mundo));
+		String ojos = getEyeColors().equalsIgnoreCase("n/a") || getEyeColors().equalsIgnoreCase("unknown")
+				|| getEyeColors().equalsIgnoreCase("none") ? "desconocido" : getEyeColors();
+		sb.append(String.format("%-50s", ojos));
+		String pelo = getHairColors().equalsIgnoreCase("n/a") || getHairColors().equalsIgnoreCase("unknown")
+				|| getHairColors().equalsIgnoreCase("none") ? "desconocido" : getHairColors();
+		sb.append(String.format("%-50s", pelo));
+		String piel = getSkinColors().equalsIgnoreCase("n/a") || getSkinColors().equalsIgnoreCase("unknown")
+				|| getSkinColors().equalsIgnoreCase("none") ? "desconocido" : getSkinColors();
+		sb.append(String.format("%-50s", piel));
+		String creado = getCreated();
+		sb.append(String.format("%-40s", creado));
+		String editado = getCreated();
+		sb.append(String.format("%-40s", editado));
+		System.out.println(sb.toString());
+	}
+
+	public void imprimeRegistroDetallado() {
+		StringBuilder sb = new StringBuilder();
+		int codigo = getCodigo();
+		sb.append(String.format("%-50s", "Código: " + codigo));
+		String name = getName();
+		sb.append(String.format("%-50s", "Nombre de la especie: " + name));
+		String designacion = getDesignation();
+		sb.append(String.format("%-50s", "Designación: " + designacion) + " \n");
+		sb.append("Carácteristicas Físicas\n");
+		String alturaPromedio = getAverageHeight().equalsIgnoreCase("n/a")
+				|| getAverageHeight().equalsIgnoreCase("unknown") ? "desconocida" : getAverageHeight();
+		sb.append(String.format("%-50s", "Altura promedio: " + alturaPromedio));
+		String esperanzaVida = getAverageLifespan().equalsIgnoreCase("unknown") ? "desconocida" : getAverageLifespan();
+		sb.append(String.format("%-50s", "Esperanza de vida: " + esperanzaVida));
+
+		String lenguaje = getLanguage().equalsIgnoreCase("n/a") ? "desconocido" : getLanguage();
+		sb.append(String.format("%-50s", "Lenguaje: " + lenguaje));
+		sb.append("\n");
+
+		String mundo = getPlanets() == null ? "desconocido" : getPlanets().getName();
+		sb.append(String.format("%-50s", "Mundo: " + mundo));
+
+		sb.append("\n");
+
+		String ojos = getEyeColors().equalsIgnoreCase("n/a") || getEyeColors().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getEyeColors();
+		sb.append(String.format("%-50s", "Color de ojos: " + ojos));
+		sb.append("\n");
+
+		String pelo = getHairColors().equalsIgnoreCase("n/a") || getHairColors().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getHairColors();
+
+		sb.append(String.format("%-50s", "Color de pelo: " + pelo));
+		sb.append("\n");
+
+		String piel = getSkinColors().equalsIgnoreCase("n/a") || getSkinColors().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getSkinColors();
+
+		sb.append(String.format("%-50s", "Color de piel: " + piel));
+		sb.append("\n----------------------------------------------\n");
+		String creado = getCreated();
+		sb.append(String.format("%-50s", "Creado: " + creado));
+		sb.append("\n");
+		String editado = getCreated();
+		sb.append(String.format("%-50s", "Editado: " + editado));
+
+		System.out.println(sb.toString());
+	}
+
 }

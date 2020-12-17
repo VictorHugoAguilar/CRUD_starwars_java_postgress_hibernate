@@ -23,6 +23,7 @@ public class ViewSpecies {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
+				ViewConsultaSpecie.getInstance();
 				break;
 			case "2":
 				break;

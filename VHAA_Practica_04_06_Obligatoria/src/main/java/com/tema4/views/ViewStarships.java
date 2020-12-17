@@ -23,6 +23,7 @@ public class ViewStarships {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
+				ViewConsultaStarships.getInstance();
 				break;
 			case "2":
 				break;

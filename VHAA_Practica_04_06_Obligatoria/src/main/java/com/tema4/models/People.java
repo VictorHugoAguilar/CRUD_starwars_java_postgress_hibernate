@@ -243,32 +243,48 @@ public class People implements java.io.Serializable {
 		String nombre = getName().length() > 30 ? getName().substring(0, 27) + "..." : getName();
 		sb.append(String.format("%-30s", nombre));
 		String altura = getHeight();
-		sb.append(String.format("%-8s", altura));
+		sb.append(String.format("%-10s", altura));
 		String peso = getMass();
-		sb.append(String.format("%-8s", peso));
+		sb.append(String.format("%-10s", peso));
 		String pelo = getHairColor();
-		sb.append(String.format("%-14s", pelo));
+		sb.append(String.format("%-30s", pelo));
 		String piel = getSkinColor();
-		sb.append(String.format("%-14s", piel));
+		sb.append(String.format("%-30s", piel));
 		String ojos = getEyeColor();
-		sb.append(String.format("%-14s", ojos));
+		sb.append(String.format("%-30s", ojos));
 		String nacimiento = getBirthYear();
-		sb.append(String.format("%-14s", nacimiento));
+		sb.append(String.format("%-20s", nacimiento));
 		String mundo = getPlanets().getName();
-		sb.append(String.format("%-15s", mundo));
+		sb.append(String.format("%-20s", mundo));
+
 		String creado = getCreated();
 		sb.append(String.format("%-30s", creado));
 		String editado = getEdited();
 		sb.append(String.format("%-30s", editado));
+
+		String species = "";
+		if (getSpecieses().isEmpty()) {
+			species = "No tiene especie";
+		} else {
+			for (Species speci : getSpecieses()) {
+				species += speci.getName() + " ";
+			}
+		}
+		sb.append(String.format("%-30s", species));
+
 		String vehicles = "";
 		if (getVehicleses().isEmpty()) {
 			vehicles = "No conduce vehicles";
 		} else {
 			for (Vehicles vehicle : getVehicleses()) {
-				vehicles += vehicle.getName() + " ";
+				if (!vehicle.getName().trim().isEmpty()) {
+					vehicles += vehicle.getName() + "  ";
+				}
 			}
 		}
-		sb.append(vehicles);
+		vehicles = vehicles.length() > 56 ? vehicles.substring(0, 56) + "..." : vehicles;
+		sb.append(String.format("%-60s", vehicles));
+
 		String starships = "";
 		if (getStarshipses().isEmpty()) {
 			starships = "No conduce starships";
@@ -277,16 +293,9 @@ public class People implements java.io.Serializable {
 				starships += st.getName() + " ";
 			}
 		}
-		sb.append(starships);
-		String species = "";
-		if (getStarshipses().isEmpty()) {
-			species = "No tiene especie";
-		} else {
-			for (Species speci : getSpecieses()) {
-				species += speci.getName() + " ";
-			}
-		}
-		sb.append(species);
+		starships = starships.length() > 56 ? starships.substring(0, 56) + "..." : starships;
+		sb.append(String.format("%-60s", starships));
+
 		String films = "";
 		if (getFilmses().isEmpty()) {
 			species = "No ha participado en films";
@@ -295,7 +304,7 @@ public class People implements java.io.Serializable {
 				films += film.getTitle() + " ";
 			}
 		}
-		sb.append(films);
+		sb.append(String.format("%-80s", films));
 
 		System.out.println(sb.toString());
 	}

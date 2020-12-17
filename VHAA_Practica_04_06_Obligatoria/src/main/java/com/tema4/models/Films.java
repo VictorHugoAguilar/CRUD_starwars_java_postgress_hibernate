@@ -203,6 +203,12 @@ public class Films implements java.io.Serializable {
 				+ planetses + ", peoples=" + peoples + ", vehicleses=" + vehicleses + "]";
 	}
 	
+	public void imprimeRegistroDetallado() {
+		System.out.println(getTitle());
+	}
 	
+	public void imprimeRegistro() {
+		System.out.println(getTitle());
+	}
 
 }

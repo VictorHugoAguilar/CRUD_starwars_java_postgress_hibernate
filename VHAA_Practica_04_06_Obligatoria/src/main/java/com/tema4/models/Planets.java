@@ -207,4 +207,87 @@ public class Planets implements java.io.Serializable {
 		this.filmses = filmses;
 	}
 
+	public void imprimeRegistro() {
+		StringBuilder sb = new StringBuilder();
+		int codigo = getCodigo();
+		sb.append(String.format("%-10s", codigo));
+		String name = getName();
+		sb.append(String.format("%-20s", name));
+		String diametro = getDiameter().equalsIgnoreCase("unknown") || getDiameter().equalsIgnoreCase("0")
+				? "desconocido"
+				: getDiameter();
+		sb.append(String.format("%-20s", diametro));
+		String rotacion = "unknown".equalsIgnoreCase(getRotationPeriod()) ? "desconocido" : getRotationPeriod();
+		sb.append(String.format("%-20s", rotacion));
+		String orbital = "unknown".equalsIgnoreCase(getOrbitalPeriod()) ? "desconocido" : getOrbitalPeriod();
+		sb.append(String.format("%-20s", orbital));
+		String gravedad = getGravity().equalsIgnoreCase("n/a") || getGravity().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getOrbitalPeriod();
+		sb.append(String.format("%-30s", gravedad));
+		String poblacion = getPopulation().equalsIgnoreCase("0") || getPopulation().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getPopulation();
+		sb.append(String.format("%-30s", poblacion));
+		String clima = getClimate().equalsIgnoreCase("0") || getClimate().equalsIgnoreCase("unknown") ? "desconocido"
+				: getClimate();
+		sb.append(String.format("%-30s", clima));
+		String terreno = getTerrain().equalsIgnoreCase("0") || getTerrain().equalsIgnoreCase("unknown") ? "desconocido"
+				: getTerrain();
+		sb.append(String.format("%-30s", terreno));
+		String superficieAgua = getSurfaceWater().equalsIgnoreCase("unknown") ? "desconocido" : getSurfaceWater();
+		sb.append(String.format("%-30s", superficieAgua));
+		String creado = getCreated();
+		sb.append(String.format("%-40s", creado));
+		String editado = getCreated();
+		sb.append(String.format("%-40s", editado));
+
+		System.out.println(sb.toString());
+	}
+
+	public void imprimeRegistroDetallado() {
+		StringBuilder sb = new StringBuilder();
+		int codigo = getCodigo();
+		sb.append(String.format("%-30s", "Código: " + codigo));
+		String name = getName();
+		sb.append(String.format("%-50s", "Nombre del Planet: " + name));
+		sb.append("\nCarácteristicas del Planets\n");
+		String diametro = getDiameter().equalsIgnoreCase("unknown") || getDiameter().equalsIgnoreCase("0")
+				? "desconocido"
+				: getDiameter();
+		sb.append(String.format("%-30s", "Diámetro: " + diametro));
+		String rotacion = "unknown".equalsIgnoreCase(getRotationPeriod()) ? "desconocido" : getRotationPeriod();
+		sb.append(String.format("%-30s", "Rotación: " + rotacion));
+		String orbital = "unknown".equalsIgnoreCase(getOrbitalPeriod()) ? "desconocido" : getOrbitalPeriod();
+		sb.append(String.format("%-30s", "Periodo Orbital: " + orbital) + "\n");
+		String gravedad = getGravity().equalsIgnoreCase("n/a") || getGravity().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getOrbitalPeriod();
+		sb.append(String.format("%-30s", "Gravedad: " + gravedad));
+		String poblacion = getPopulation().equalsIgnoreCase("0") || getPopulation().equalsIgnoreCase("unknown")
+				? "desconocido"
+				: getPopulation();
+		sb.append(String.format("%-30s", "Población: " + poblacion));
+
+		String clima = getClimate().equalsIgnoreCase("0") || getClimate().equalsIgnoreCase("unknown") ? "desconocido"
+				: getClimate();
+		sb.append(String.format("%-30s", "Clima: " + clima) + "\n");
+
+		String terreno = getTerrain().equalsIgnoreCase("0") || getTerrain().equalsIgnoreCase("unknown") ? "desconocido"
+				: getTerrain();
+		sb.append(String.format("%-30s", "Terreno: " + terreno));
+
+		String superficieAgua = getSurfaceWater().equalsIgnoreCase("unknown") ? "desconocido" : getSurfaceWater();
+		sb.append(String.format("%-30s", "Superficie Agua: " + superficieAgua));
+
+		sb.append("\n----------------------------------------------\n");
+		String creado = getCreated();
+		sb.append(String.format("%-50s", "Creado: " + creado));
+		sb.append("\n");
+		String editado = getCreated();
+		sb.append(String.format("%-50s", "Editado: " + editado));
+
+		System.out.println(sb.toString());
+	}
+
 }

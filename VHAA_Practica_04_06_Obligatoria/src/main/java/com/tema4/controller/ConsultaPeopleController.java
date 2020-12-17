@@ -37,7 +37,6 @@ public class ConsultaPeopleController {
 			if (consultaPeople.isEmpty()) {
 				System.out.println(KConstants.Common.NOT_REGISTER + " para el nombre " + name);
 			} else {
-				Utiles.getCabeceraRegistroPeople();
 				consultaPeople.stream().forEach(People::imprimeRegistroDetallado);
 			}
 
@@ -133,6 +132,31 @@ public class ConsultaPeopleController {
 						+ " veces.";
 				System.out.println(resultQuery);
 			}
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+	}
+
+	public static void getAllRegister() {
+		manejador = HandlerBD.getInstance();
+		manejador.tearUp();
+		buscarTodosRegistros();
+		manejador.tearDown();
+	}
+
+	private static void buscarTodosRegistros() {
+		final String sqlQuery = "SELECT * FROM people";
+
+		try {
+			List<People> consultaPeople = manejador.session.createNativeQuery(sqlQuery).addEntity(People.class).list();
+
+			if (consultaPeople.isEmpty()) {
+				System.out.println(KConstants.Common.NOT_REGISTER);
+			} else {
+				Utiles.getCabeceraRegistroPeople();
+				consultaPeople.stream().forEach(People::imprimeRegistroCompleto);
+			}
+
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}

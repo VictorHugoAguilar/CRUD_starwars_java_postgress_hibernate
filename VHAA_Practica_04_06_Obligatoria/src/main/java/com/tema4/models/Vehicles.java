@@ -228,5 +228,15 @@ public class Vehicles implements java.io.Serializable {
 				+ ", cargoCapacity=" + cargoCapacity + ", consumables=" + consumables + ", created=" + created
 				+ ", edited=" + edited + ", peoples=" + peoples + ", filmses=" + filmses + "]";
 	}
+	
+	public void imprimeRegistroDetallado() {
+		System.out.println(getName());
+	}
+	
+	public void imprimeRegistro() {
+		System.out.println(getName());
+	}
+	
+	
 
 }

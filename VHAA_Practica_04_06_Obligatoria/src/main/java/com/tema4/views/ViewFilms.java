@@ -23,6 +23,7 @@ public class ViewFilms {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
+				ViewConsultaFilms.getInstance();
 				break;
 			case "2":
 				break;

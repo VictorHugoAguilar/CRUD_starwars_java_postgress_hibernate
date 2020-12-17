@@ -41,6 +41,10 @@ public class ViewConsultaPeople {
 				ConsultaPeopleController.getMoreRepeatedHair();
 				presioneTeclaParaContinuar();
 				break;
+			case "5":
+				ConsultaPeopleController.getAllRegister();
+				presioneTeclaParaContinuar();
+				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");
 				terminado = true;
@@ -53,11 +57,12 @@ public class ViewConsultaPeople {
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de People: ");
-		System.out.println("1- Buscar people por name");
+		System.out.println("Opciones de Consulta de Personajes: ");
+		System.out.println("1- Buscar people por nombre");
 		System.out.println("2- Buscar people sin especie");
 		System.out.println("3- Buscar people en más películas");
 		System.out.println("4- Buscar color de pelo más repetido");
+		System.out.println("5- Mostrar todos");
 		System.out.println("0- Salir ");
 	}
 

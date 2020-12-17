@@ -244,4 +244,12 @@ public class Starships implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
+	public void imprimeRegistroDetallado() {
+		System.out.println(getName());
+	}
+
+	public void imprimeRegistro() {
+		System.out.println(getName());
+	}
+
 }

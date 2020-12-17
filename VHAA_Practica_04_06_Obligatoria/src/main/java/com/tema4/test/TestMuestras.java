@@ -1,6 +1,7 @@
 package com.tema4.test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.query.Query;
 
@@ -27,27 +28,36 @@ public class TestMuestras {
 		manejador.tearUp();
 		manejador.comprobarSession();
 		// comprueba
-
 		// compruebaFilms();
-
 		// compruebaStarships();
-
 		// compruebaVehicles();
-
 		// compruebaPeoples();
-
 		// compruebaEspecies();
-
 		// compruebaPlanets();
-
 		// mostrarPeoplesMasPeliculasParticipado();
-
 		// mostrarPeopleSinEspecie();
-
-		buscarPeopleName("r2");
+		// buscarPeopleName("r2");
+		// buscarSpecieName("yod");
+		// mostrarEspeciesSinPersonajes();
 
 		// cerrar
 		manejador.tearDown();
+	}
+
+	private static void mostrarEspeciesSinPersonajes() {
+		final String sqlQuery = "FROM Species";
+		List<Species> consultaSpecies = manejador.session.createQuery(sqlQuery).list();
+
+		List<Species> SpeciesSinPersonajes = consultaSpecies.stream().filter(s -> s.getPeoples().isEmpty())
+				.collect(Collectors.toList());
+
+		SpeciesSinPersonajes.stream().forEach(Species::imprimeRegistroDetallado);
+	}
+
+	private static void buscarSpecieName(String name) {
+		final String sqlQuery = "FROM Species where UPPER(name) like '%" + name.toUpperCase() + "%'";
+		List<Species> consultaSpecies = manejador.session.createQuery(sqlQuery).list();
+		consultaSpecies.stream().forEach(Species::imprimeRegistro);
 	}
 
 	@SuppressWarnings("unchecked")
