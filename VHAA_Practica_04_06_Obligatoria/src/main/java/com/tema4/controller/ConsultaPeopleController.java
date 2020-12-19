@@ -1,5 +1,6 @@
 package com.tema4.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.tema4.constants.KConstants;
@@ -137,29 +138,37 @@ public class ConsultaPeopleController {
 		}
 	}
 
-	public static void getAllRegister() {
-		manejador = HandlerBD.getInstance();
-		manejador.tearUp();
-		buscarTodosRegistros();
-		manejador.tearDown();
+	public static void showRegisters() {
+		mostrarTodos(getRegisters());
 	}
 
-	private static void buscarTodosRegistros() {
-		final String sqlQuery = "SELECT * FROM people";
+	private static void mostrarTodos(List<People> consultaPeople) {
+		if (consultaPeople.isEmpty()) {
+			System.out.println(KConstants.Common.NOT_REGISTER);
+		} else {
+			Utiles.getCabeceraRegistroPeople();
+			consultaPeople.stream().forEach(People::imprimeRegistroCompleto);
+		}
+	}
 
+	public static List<People> getRegisters() {
+		manejador = HandlerBD.getInstance();
+		manejador.tearUp();
+		List<People> consultaPeople = obtenerRegistros();
+		manejador.tearDown();
+
+		return consultaPeople;
+	}
+
+	private static List<People> obtenerRegistros() {
+		final String sqlQuery = "FROM People";
+		List<People> consultaPeople = new ArrayList<People>();
 		try {
-			List<People> consultaPeople = manejador.session.createNativeQuery(sqlQuery).addEntity(People.class).list();
-
-			if (consultaPeople.isEmpty()) {
-				System.out.println(KConstants.Common.NOT_REGISTER);
-			} else {
-				Utiles.getCabeceraRegistroPeople();
-				consultaPeople.stream().forEach(People::imprimeRegistroCompleto);
-			}
-
+			consultaPeople = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
+		return consultaPeople;
 	}
 
 }

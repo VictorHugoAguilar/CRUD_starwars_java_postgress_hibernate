@@ -1,9 +1,11 @@
 package com.tema4.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.tema4.constants.KConstants;
 import com.tema4.models.Planets;
+import com.tema4.models.Starships;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
@@ -40,26 +42,41 @@ public class ConsultaPlanetsController {
 		}
 	}
 
-	public static void getAllRegister() {
-		manejador = HandlerBD.getInstance();
-		manejador.tearUp();
-		mostrarTodos();
-		manejador.tearDown();
+	public static void showRegisters() {
+		mostrarTodos(getRegisters());
 	}
 
-	private static void mostrarTodos() {
+	private static void mostrarTodos(List<Planets> consultaPlanets) {
+		if (consultaPlanets.isEmpty()) {
+			System.out.println(KConstants.Common.NOT_REGISTER);
+		} else {
+			Utiles.getCabeceraRegistroPlanet();
+			consultaPlanets.stream().forEach(Planets::imprimeRegistro);
+		}
+	}
+
+	public static List<Planets> getRegisters() {
+		manejador = HandlerBD.getInstance();
+		manejador.tearUp();
+		List<Planets> consultaPlanets = obtenerRegistros();
+		manejador.tearDown();
+		return consultaPlanets;
+	}
+
+	private static List<Planets> obtenerRegistros() {
 		final String sqlQuery = "FROM Planets ";
+		List<Planets> consultaPlanets = new ArrayList<Planets>();
 		try {
-			List<Planets> consultaPlanets = manejador.session.createQuery(sqlQuery).list();
-			if (consultaPlanets.isEmpty()) {
-				System.out.println(KConstants.Common.NOT_REGISTER);
-			} else {
-				Utiles.getCabeceraRegistroPlanet();
-				consultaPlanets.stream().forEach(Planets::imprimeRegistro);
-			}
+			consultaPlanets = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
+		return consultaPlanets;
+	}
+
+	public static void main(String[] args) {
+		showRegisters();
+		getPlanetByName("nabo");
 	}
 
 }

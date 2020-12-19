@@ -30,7 +30,7 @@ public class ViewConsultaPlanets {
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaPlanetsController.getAllRegister();
+				ConsultaPlanetsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

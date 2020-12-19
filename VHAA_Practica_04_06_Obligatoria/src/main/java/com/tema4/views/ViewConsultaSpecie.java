@@ -34,7 +34,7 @@ public class ViewConsultaSpecie {
 				presioneTeclaParaContinuar();
 				break;
 			case "3":
-				ConsultaSpecieController.getAllRegister();
+				ConsultaSpecieController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

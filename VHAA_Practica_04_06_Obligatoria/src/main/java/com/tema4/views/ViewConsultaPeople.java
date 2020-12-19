@@ -42,7 +42,7 @@ public class ViewConsultaPeople {
 				presioneTeclaParaContinuar();
 				break;
 			case "5":
-				ConsultaPeopleController.getAllRegister();
+				ConsultaPeopleController.showRegisters() ;
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

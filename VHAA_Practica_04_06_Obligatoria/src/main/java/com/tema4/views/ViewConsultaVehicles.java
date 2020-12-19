@@ -30,7 +30,7 @@ public class ViewConsultaVehicles {
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaVehiclesController.getAllRegister();
+				ConsultaVehiclesController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

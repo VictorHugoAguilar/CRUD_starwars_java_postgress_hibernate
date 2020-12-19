@@ -1,5 +1,6 @@
 package com.tema4.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.tema4.constants.KConstants;
@@ -40,27 +41,37 @@ public class ConsultaStarshipsController {
 		}
 	}
 
-	public static void getAllRegister() {
-		manejador = HandlerBD.getInstance();
-		manejador.tearUp();
-		mostrarTodos();
-		manejador.tearDown();
+	public static void showRegisters() {
+		mostrarTodos(getRegisters());
 	}
 
-	private static void mostrarTodos() {
-		final String sqlQuery = "FROM Starships";
-		try {
-			List<Starships> consultaStarships = manejador.session.createQuery(sqlQuery).list();
+	private static void mostrarTodos(List<Starships> consultaStarships) {
+		if (consultaStarships.isEmpty()) {
+			System.out.println(KConstants.Common.NOT_REGISTER);
+		} else {
+			Utiles.getCabeceraRegistroStarships();
+			consultaStarships.stream().forEach(Starships::imprimeRegistro);
+		}
+	}
 
-			if (consultaStarships.isEmpty()) {
-				System.out.println(KConstants.Common.NOT_REGISTER);
-			} else {
-				Utiles.getCabeceraRegistroStarships();
-				consultaStarships.stream().forEach(Starships::imprimeRegistro);
-			}
+	public static List<Starships> getRegisters() {
+		manejador = HandlerBD.getInstance();
+		manejador.tearUp();
+		List<Starships> consultaStarships = obtenerRegistros();
+		manejador.tearDown();
+
+		return consultaStarships;
+	}
+
+	private static List<Starships> obtenerRegistros() {
+		final String sqlQuery = "FROM Starships";
+		List<Starships> consultaStarships = new ArrayList<Starships>();
+		try {
+			consultaStarships = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
+		return consultaStarships;
 	}
 
 }

@@ -30,7 +30,7 @@ public class ViewConsultaFilms {
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaFilmsController.getAllRegister();
+				ConsultaFilmsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

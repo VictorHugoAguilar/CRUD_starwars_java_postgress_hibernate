@@ -1,9 +1,11 @@
 package com.tema4.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.tema4.constants.KConstants;
 import com.tema4.models.Films;
+import com.tema4.models.Vehicles;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
@@ -40,27 +42,36 @@ public class ConsultaFilmsController {
 		}
 	}
 
-	public static void getAllRegister() {
-		manejador = HandlerBD.getInstance();
-		manejador.tearUp();
-		mostrarTodos();
-		manejador.tearDown();
+	public static void showRegisters() {
+		mostrarTodos(getRegisters());
 	}
 
-	private static void mostrarTodos() {
-		final String sqlQuery = "FROM Films";
-		try {
-			List<Films> consultaFilms = manejador.session.createQuery(sqlQuery).list();
+	private static void mostrarTodos(List<Films> consultaFilms) {
+		if (consultaFilms.isEmpty()) {
+			System.out.println(KConstants.Common.NOT_REGISTER);
+		} else {
+			Utiles.getCabeceraRegistroFilms();
+			consultaFilms.stream().forEach(Films::imprimeRegistro);
+		}
+	}
 
-			if (consultaFilms.isEmpty()) {
-				System.out.println(KConstants.Common.NOT_REGISTER);
-			} else {
-				Utiles.getCabeceraRegistroVehicles();
-				consultaFilms.stream().forEach(Films::imprimeRegistro);
-			}
+	public static List<Films> getRegisters() {
+		manejador = HandlerBD.getInstance();
+		manejador.tearUp();
+		List<Films> consultaFilms = obtenerRegistros();
+		manejador.tearDown();
+		return consultaFilms;
+	}
+
+	private static List<Films> obtenerRegistros() {
+		final String sqlQuery = "FROM Films";
+		List<Films> consultaFilms = new ArrayList<Films>();
+		try {
+			consultaFilms = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
+		return consultaFilms;
 	}
 
 }

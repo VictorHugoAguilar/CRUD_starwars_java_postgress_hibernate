@@ -30,7 +30,7 @@ public class ViewConsultaStarships {
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaStarshipsController.getAllRegister();
+				ConsultaStarshipsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":
