@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -14,7 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
+import org.hibernate.annotations.GenericGenerator;
+
 import com.tema4.utils.Utiles;
 
 /**
@@ -72,6 +74,8 @@ public class Planets implements java.io.Serializable {
 	}
 
 	@Id
+	@GenericGenerator(name = "kaugen", strategy = "increment")
+	@GeneratedValue(generator = "kaugen")
 	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
 		return this.codigo;
@@ -198,7 +202,7 @@ public class Planets implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "films_planets", joinColumns = {
 			@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
@@ -245,7 +249,7 @@ public class Planets implements java.io.Serializable {
 		int codigo = getCodigo();
 		sb.append(String.format("%-30s", "Código: " + codigo));
 		String name = getName();
-		sb.append(String.format("%-50s", "Nombre del Planet: " + name));
+		sb.append(String.format("%-50s", "Nombre del Planet: " + name) + "\n");
 		sb.append("\nCarácteristicas del Planets\n");
 		String diametro = Utiles.checkUnknown(getDiameter());
 		sb.append(String.format("%-30s", "Diámetro: " + diametro));
@@ -263,13 +267,48 @@ public class Planets implements java.io.Serializable {
 		sb.append(String.format("%-30s", "Superficie Agua: " + superficieAgua));
 		String terreno = Utiles.checkUnknown(getTerrain());
 		sb.append(String.format("%-60s", "Terreno: " + terreno) + "\n");
+
+		String habitado = "";
+		for (People p : getPeoples()) {
+			habitado += p.getName() + "   ";
+		}
+		if (!habitado.isEmpty()) {
+			sb.append("\nPlaneta de: \n");
+			sb.append(habitado + "\n");
+		}
+
+		String especies = "";
+		for (Species s : getSpecieses()) {
+			especies += s.getName() + "   ";
+		}
+		if (!especies.isEmpty()) {
+			sb.append("\nEspecies que habita: \n");
+			sb.append(especies + "\n");
+		}
+
+		String films = "";
+		for (Films f : getFilmses()) {
+			films += f.getTitle() + "   ";
+		}
+		if (!films.isEmpty()) {
+			sb.append("\nFilms donde aparece: \n");
+			sb.append(films + "\n");
+		}
+
 		String creado = getCreated();
-		sb.append(String.format("%-50s", "Creado: " + creado));
+		sb.append(String.format("%-50s", "\nCreado: " + creado));
 		sb.append("\n");
 		String editado = getCreated();
-		sb.append(String.format("%-50s", "Editado: " + editado));
+		sb.append(String.format("%-50s", "Editado: " + editado) + "\n");
 
 		System.out.println(sb.toString());
 	}
 
+	public void imprimeCodValor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()) + " - ");
+		String nombre = Utiles.formatedTextSize(getName(), 30);
+		sb.append(String.format("%-30s", nombre));
+		System.out.println(sb.toString());
+	}
 }

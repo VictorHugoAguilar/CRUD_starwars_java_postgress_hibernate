@@ -50,7 +50,7 @@ public class ViewConsultaFilms {
 		System.out.println("Opciones de Consultas Films: ");
 		System.out.println("1- Buscar Films por titulo");
 		System.out.println("2- Mostrar Todos");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 	static void presioneTeclaParaContinuar() {

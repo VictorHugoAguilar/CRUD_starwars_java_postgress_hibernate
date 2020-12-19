@@ -2,6 +2,7 @@ package com.tema4.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import com.tema4.constants.KConstants;
@@ -9,6 +10,7 @@ import com.tema4.models.People;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+@SuppressWarnings("unchecked")
 public class PeopleController implements ICRUDController {
 	static PeopleController peopleController;
 	static HandlerBD manejador;
@@ -200,4 +202,41 @@ public class PeopleController implements ICRUDController {
 		return consultaPeople;
 	}
 
+	public static List<People> cargarPeoples(List<People> peoplesInsertadas) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		List<People> listaPeoples = new ArrayList<People>();
+		boolean valido = false;
+
+		peoplesInsertadas.stream().forEach(People::imprimeCodValor);
+
+		Optional<People> peopleEncontrada;
+		do {
+			System.out.println("Ingrese el código del People: ");
+			final String codigo = teclado.nextLine();
+			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
+
+			if (valido) {
+				peopleEncontrada = peoplesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
+						.findAny();
+
+				if (!peopleEncontrada.isPresent()) {
+					valido = false;
+					System.out.println("El código introducido no es válido");
+				} else {
+					listaPeoples.add(peopleEncontrada.get());
+
+					System.out.println("Desea ingresar otra People S/N");
+					String otraNave = teclado.nextLine();
+					if ("S".equalsIgnoreCase(otraNave.trim())) {
+						valido = false;
+					} else {
+						valido = true;
+					}
+				}
+			}
+		} while (!valido);
+		return listaPeoples;
+	}
 }

@@ -10,11 +10,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.tema4.utils.Utiles;
 
@@ -72,6 +75,8 @@ public class Vehicles implements java.io.Serializable {
 	}
 
 	@Id
+	@GenericGenerator(name="kaugen" , strategy="increment")
+	@GeneratedValue(generator="kaugen")
 	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
 		return this.codigo;
@@ -198,7 +203,7 @@ public class Vehicles implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "vehicles_people", joinColumns = {
 			@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
@@ -210,7 +215,7 @@ public class Vehicles implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "vehicles_films", joinColumns = {
 			@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
@@ -236,7 +241,7 @@ public class Vehicles implements java.io.Serializable {
 		Integer intCodigo = getCodigo();
 		sb.append(String.format("%-20s", "Codigo: " + intCodigo));
 		String nombre = getName();
-		sb.append(String.format("%-40s", "Nombre:" + nombre));
+		sb.append(String.format("%-40s", "Nombre:" + nombre) + "\n");
 		sb.append("\nCaracteristicas\n");
 		String modelo = getModel();
 		sb.append(String.format("%-50s", "Model: " + modelo));
@@ -261,7 +266,7 @@ public class Vehicles implements java.io.Serializable {
 			conductores += p.getName() + "   ";
 		}
 		if (!conductores.isEmpty()) {
-			sb.append("Conducido por: \n");
+			sb.append("\nConducido por: \n");
 			sb.append(conductores + "\n");
 		}
 		String filmsAparicion = "";
@@ -269,13 +274,13 @@ public class Vehicles implements java.io.Serializable {
 			filmsAparicion += f.getTitle() + "  ";
 		}
 		if (!filmsAparicion.isEmpty()) {
-			sb.append("Aparece en films: \n");
+			sb.append("\nAparece en films: \n");
 			sb.append(filmsAparicion + "\n");
 		}
 		String creado = getCreated();
-		sb.append(String.format("%-50s", "Creado: " + creado) + "\n");
+		sb.append(String.format("%-50s", "\nCreado: " + creado) + "\n");
 		String editado = getCreated();
-		sb.append(String.format("%-50s", "Editado: " + editado));
+		sb.append(String.format("%-50s", "Editado: " + editado) + "\n");
 
 		System.out.println(sb.toString());
 	}
@@ -308,6 +313,14 @@ public class Vehicles implements java.io.Serializable {
 		sb.append(String.format("%-40s", creado));
 		String editado = getCreated();
 		sb.append(String.format("%-40s", editado));
+		System.out.println(sb.toString());
+	}
+	
+	public void imprimeCodValor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()) + " - ");
+		String nombre = Utiles.formatedTextSize(getName(), 30);
+		sb.append(String.format("%-30s", nombre));
 		System.out.println(sb.toString());
 	}
 

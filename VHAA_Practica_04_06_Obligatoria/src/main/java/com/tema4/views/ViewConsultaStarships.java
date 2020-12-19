@@ -50,7 +50,7 @@ public class ViewConsultaStarships {
 		System.out.println("Opciones de Consultas de Starships: ");
 		System.out.println("1- Buscar Starships por nombre");
 		System.out.println("2- Mostrar Todas");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 	static void presioneTeclaParaContinuar() {

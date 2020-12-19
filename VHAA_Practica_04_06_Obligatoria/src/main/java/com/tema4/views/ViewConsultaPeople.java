@@ -65,7 +65,7 @@ public class ViewConsultaPeople {
 		System.out.println("3- Buscar people en más películas");
 		System.out.println("4- Buscar color de pelo más repetido");
 		System.out.println("5- Mostrar todos");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 	static void presioneTeclaParaContinuar() {

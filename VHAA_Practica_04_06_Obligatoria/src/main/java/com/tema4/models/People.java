@@ -7,12 +7,15 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.tema4.utils.Utiles;
 
@@ -73,6 +76,8 @@ public class People implements java.io.Serializable {
 	}
 
 	@Id
+	@GenericGenerator(name = "kaugen", strategy = "increment")
+	@GeneratedValue(generator = "kaugen")
 	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
 		return this.codigo;
@@ -182,7 +187,7 @@ public class People implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "starships_people", joinColumns = {
 			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) })
@@ -194,7 +199,7 @@ public class People implements java.io.Serializable {
 		this.starshipses = starshipses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Species.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Species.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "species_people", joinColumns = {
 			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) })
@@ -206,7 +211,7 @@ public class People implements java.io.Serializable {
 		this.specieses = specieses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "vehicles_people", joinColumns = {
 			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) })
@@ -218,7 +223,7 @@ public class People implements java.io.Serializable {
 		this.vehicleses = vehicleses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "films_people", joinColumns = {
 			@JoinColumn(name = "codigo_people", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
@@ -387,6 +392,14 @@ public class People implements java.io.Serializable {
 		String editado = getEdited();
 		sb.append(String.format("%-50s", "Editado: " + editado));
 
+		System.out.println(sb.toString());
+	}
+
+	public void imprimeCodValor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()) + " - ");
+		String nombre = Utiles.formatedTextSize(getName(), 30);
+		sb.append(String.format("%-30s", nombre));
 		System.out.println(sb.toString());
 	}
 

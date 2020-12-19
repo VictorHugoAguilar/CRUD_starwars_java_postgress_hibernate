@@ -54,7 +54,7 @@ public class ViewFilms {
 		System.out.println("2- Insertar film");
 		System.out.println("3- Modificar film");
 		System.out.println("4- Borrar film");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

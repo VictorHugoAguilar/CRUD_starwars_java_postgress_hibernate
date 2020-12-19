@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -14,7 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.sun.corba.se.impl.javax.rmi.CORBA.Util;
+import org.hibernate.annotations.GenericGenerator;
+
 import com.tema4.utils.Utiles;
 
 /**
@@ -67,6 +69,8 @@ public class Species implements java.io.Serializable {
 	}
 
 	@Id
+	@GenericGenerator(name="kaugen" , strategy="increment")
+	@GeneratedValue(generator="kaugen")
 	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
 		return this.codigo;
@@ -185,7 +189,7 @@ public class Species implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "species_people", joinColumns = {
 			@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
@@ -231,18 +235,16 @@ public class Species implements java.io.Serializable {
 		int codigo = getCodigo();
 		sb.append(String.format("%-30s", "Código: " + codigo));
 		String name = getName();
-		sb.append(String.format("%-30s", "Nombre de la especie: " + name));
+		sb.append(String.format("%-50s", "Nombre de la especie: " + name));
 		String designacion = getDesignation();
-		sb.append(String.format("%-30s", "Designación: " + designacion) + " \n");
-		sb.append("Carácteristicas Físicas\n");
+		sb.append(String.format("%-50s", "Designación: " + designacion) + " \n");
+		sb.append("\nCarácteristicas Físicas\n");
 		String alturaPromedio = Utiles.checkUnknown(getAverageHeight());
 		sb.append(String.format("%-30s", "Altura promedio: " + alturaPromedio));
 		String esperanzaVida = Utiles.checkUnknown(getAverageLifespan());
 		sb.append(String.format("%-30s", "Esperanza de vida: " + esperanzaVida));
 		String lenguaje = Utiles.checkUnknown(getLanguage());
 		sb.append(String.format("%-30s", "Lenguaje: " + lenguaje) + "\n");
-		String mundo = getPlanets() == null ? "desconocido" : getPlanets().getName();
-		sb.append(String.format("%-50s", "Mundo: " + mundo) + "\n");
 		String ojos = Utiles.checkUnknown(getEyeColors());
 		sb.append(String.format("%-50s", "Color de ojos: " + ojos) + "\n");
 		String pelo = Utiles.checkUnknown(getHairColors());
@@ -250,12 +252,31 @@ public class Species implements java.io.Serializable {
 		sb.append("\n");
 		String piel = Utiles.checkUnknown(getSkinColors());
 		sb.append(String.format("%-50s", "Color de piel: " + piel) + "\n");
+		
+		String mundo = getPlanets() == null ? "desconocido" : getPlanets().getName();
+		sb.append(String.format("%-50s", "\nMundo: " + mundo) + "\n");
+		
+		String peoples = "";
+		for (People p : getPeoples()) {
+			peoples += p.getName() + "   ";
+		}
+		if (!peoples.isEmpty()) {
+			sb.append("\nPeoples de esta especie: \n");
+			sb.append(peoples + "\n");
+		}
 		String creado = getCreated();
-		sb.append(String.format("%-50s", "Creado: " + creado));
-		sb.append("\n");
+		sb.append(String.format("%-50s", "\nCreado: " + creado) + "\n");
 		String editado = getCreated();
 		sb.append(String.format("%-50s", "Editado: " + editado) + "\n");
 
+		System.out.println(sb.toString());
+	}
+	
+	public void imprimeCodValor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()) + " - ");
+		String nombre = Utiles.formatedTextSize(getName(), 30);
+		sb.append(String.format("%-30s", nombre));
 		System.out.println(sb.toString());
 	}
 

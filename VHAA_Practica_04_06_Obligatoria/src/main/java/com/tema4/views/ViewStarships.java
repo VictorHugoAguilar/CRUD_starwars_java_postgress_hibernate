@@ -54,7 +54,7 @@ public class ViewStarships {
 		System.out.println("2- Insertar starship");
 		System.out.println("3- Modificar starship");
 		System.out.println("4- Borrar starship");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

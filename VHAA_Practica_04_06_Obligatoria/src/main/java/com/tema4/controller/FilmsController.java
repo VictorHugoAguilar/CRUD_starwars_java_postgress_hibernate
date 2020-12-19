@@ -1,14 +1,25 @@
 package com.tema4.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
+
+import org.hibernate.Transaction;
 
 import com.tema4.constants.KConstants;
 import com.tema4.models.Films;
+import com.tema4.models.People;
+import com.tema4.models.Planets;
+import com.tema4.models.Starships;
+import com.tema4.models.Vehicles;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+@SuppressWarnings("unchecked")
 public class FilmsController implements ICRUDController {
 	static FilmsController filmsController;
 	static HandlerBD manejador;
@@ -29,29 +40,370 @@ public class FilmsController implements ICRUDController {
 
 	@Override
 	public void create() {
+		String deseaIngresar = "";
 		manejador.tearUp();
+		Transaction trans = manejador.session.beginTransaction();
 
+		Films filmToInsert = getFilmToInsert();
+		manejador.session.save(filmToInsert);
+		Set<Films> films = new HashSet<Films>();
+		films.add(filmToInsert);
+
+		System.out.println("Desea ingresar starships en el films S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Starships";
+			List<Starships> navesInsertadas = new ArrayList<Starships>();
+			navesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
+			if (!listaNaves.isEmpty()) {
+				listaNaves.stream().forEach(nave -> {
+					nave.setFilmses(films);
+					manejador.session.save(nave);
+				});
+			}
+		}
+
+		System.out.println("Desea ingresar vehicles en el films S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Vehicles";
+			List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
+			vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
+			if (!listaVehicles.isEmpty()) {
+				listaVehicles.stream().forEach(vehicle -> {
+					vehicle.setFilmses(films);
+					manejador.session.save(vehicle);
+				});
+			}
+		}
+
+		System.out.println("Desea ingresar planets en el films S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Planets";
+			List<Planets> planetsInsertadas = new ArrayList<Planets>();
+			planetsInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Planets> listaPlanets = PlanetsController.cargarPlanets(planetsInsertadas);
+			if (!listaPlanets.isEmpty()) {
+				listaPlanets.stream().forEach(planet -> {
+					planet.setFilmses(films);
+					manejador.session.save(planet);
+				});
+			}
+		}
+
+		System.out.println("Desea ingresar people en el films S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM People";
+			List<People> peoplesInsertadas = new ArrayList<People>();
+			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			if (!listaPeoples.isEmpty()) {
+				listaPeoples.stream().forEach(people -> {
+					people.setCodigo(people.getCodigo());
+					people.setFilmses(films);
+					manejador.session.save(people);
+				});
+			}
+		}
+
+		trans.commit();
+		System.out.println("registro ingresado...");
+		manejador.tearDown();
+	}
+
+	private Films getFilmToInsert() {
+		Films films = new Films();
 		boolean valido = false;
 		String titulo = "";
 		do {
-			System.out.println("Ingrese el título de la película(obligatorio): ");
+			System.out.println("Ingrese el título de la película: ");
 			titulo = teclado.nextLine();
+
+			valido = !titulo.trim().isEmpty();
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
 
 		} while (!valido);
 
-		manejador.tearDown();
+		String episodio = "";
+		do {
+			System.out.println("Ingrese el número de episodio");
+			episodio = teclado.nextLine();
+
+			valido = !episodio.trim().isEmpty() && Utiles.isNumeric(episodio);
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
+
+		} while (!valido);
+
+		String director = "";
+		do {
+			System.out.println("Ingrese el nombre del director/es: ");
+			director = teclado.nextLine();
+
+			valido = !director.trim().isEmpty();
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
+
+		} while (!valido);
+
+		String productor = "";
+		do {
+			System.out.println("Ingrese el nombre del productor/es: ");
+			productor = teclado.nextLine();
+
+			valido = !productor.trim().isEmpty();
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
+
+		} while (!valido);
+
+		String sinopsis = "";
+		do {
+			System.out.println("Ingrese la sinopsis de la pelicula: ");
+			sinopsis = teclado.nextLine();
+
+			valido = !sinopsis.trim().isEmpty();
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
+
+		} while (!valido);
+
+		String fechaSalida = "";
+		do {
+			System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
+			fechaSalida = teclado.nextLine();
+
+			valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			} else {
+				fechaSalida = Utiles.parseDate(fechaSalida, KConstants.FormatDate.YYYYMMDDD);
+			}
+
+		} while (!valido);
+
+		String fechaCreación = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+
+		films.setTitle(titulo);
+		films.setEpisodeId(episodio);
+		films.setDirector(director);
+		films.setProducer(productor);
+		films.setOpeningCrawl(sinopsis);
+		films.setReleaseDate(fechaSalida);
+		films.setCreated(fechaCreación);
+		films.setEdited(fechaEdicion);
+		return films;
 	}
 
 	@Override
 	public void delete() {
-		// TODO Auto-generated method stub
+		List<Films> listaFilms = getRegisters();
+		listaFilms.stream().forEach(Films::imprimeCodValor);
 
+		Optional<Films> filmEncontrado = null;
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de Films ha eliminar");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				filmEncontrado = listaFilms.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = true;
+			} else {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println("Desea introducir otro S/N: ");
+				String otro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(otro.trim())) {
+					valido = false;
+				} else {
+					valido = true;
+				}
+			}
+		} while (!valido);
+		manejador.tearUp();
+		if (valido && filmEncontrado.isPresent()) {
+			System.out.println(KConstants.Common.ARE_YOU_SURE);
+			String seguro = teclado.nextLine();
+			if ("S".equalsIgnoreCase(seguro.trim())) {
+				Transaction trans = manejador.session.beginTransaction();
+				manejador.session.delete(filmEncontrado.get());
+				trans.commit();
+				System.out.println("Films borrado...");
+			}
+		}
+		manejador.tearDown();
 	}
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		List<Films> listaFilms = getRegisters();
+		listaFilms.stream().forEach(Films::imprimeCodValor);
 
+		Optional<Films> filmEncontrado = null;
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de Films ha eliminar");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				filmEncontrado = listaFilms.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = true;
+			} else {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println("Desea introducir otro S/N: ");
+				String otro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(otro.trim())) {
+					valido = false;
+				} else {
+					valido = true;
+				}
+			}
+		} while (!valido);
+		if (valido && filmEncontrado.isPresent()) {
+			manejador.tearUp();
+			Films filmModificado = obtenerDatosModificados(filmEncontrado.get());
+
+			String deseaIngresar = "";
+			Transaction trans = manejador.session.beginTransaction();
+
+			manejador.session.save(filmModificado);
+			Set<Films> films = new HashSet<Films>();
+			films.add(filmModificado);
+
+			System.out.println("Desea ingresar starships en el films S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Starships";
+				List<Starships> navesInsertadas = new ArrayList<Starships>();
+				navesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
+				if (!listaNaves.isEmpty()) {
+					listaNaves.stream().forEach(nave -> {
+						nave.setFilmses(films);
+						manejador.session.save(nave);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar vehicles en el films S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Vehicles";
+				List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
+				vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
+				if (!listaVehicles.isEmpty()) {
+					listaVehicles.stream().forEach(vehicle -> {
+						vehicle.setFilmses(films);
+						manejador.session.save(vehicle);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar planets en el films S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Planets";
+				List<Planets> planetsInsertadas = new ArrayList<Planets>();
+				planetsInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Planets> listaPlanets = PlanetsController.cargarPlanets(planetsInsertadas);
+				if (!listaPlanets.isEmpty()) {
+					listaPlanets.stream().forEach(planet -> {
+						planet.setFilmses(films);
+						manejador.session.save(planet);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar people en el films S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM People";
+				List<People> peoplesInsertadas = new ArrayList<People>();
+				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+				if (!listaPeoples.isEmpty()) {
+					listaPeoples.stream().forEach(people -> {
+						people.setCodigo(people.getCodigo());
+						people.setFilmses(films);
+						manejador.session.save(people);
+					});
+				}
+			}
+
+			trans.commit();
+			System.out.println("registro modificado...");
+			manejador.tearDown();
+		}
+	}
+
+	private Films obtenerDatosModificados(Films films) {
+		boolean valido = false;
+		System.out.println("Ingrese el título de la película: ");
+		String titulo = teclado.nextLine();
+		String episodio = "";
+		do {
+			System.out.println("Ingrese el número de episodio");
+			episodio = teclado.nextLine();
+
+			valido = Utiles.isNumeric(episodio);
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			}
+
+		} while (!valido);
+
+		System.out.println("Ingrese el nombre del director/es: ");
+		String director = teclado.nextLine();
+
+		System.out.println("Ingrese el nombre del productor/es: ");
+		String productor = teclado.nextLine();
+
+		System.out.println("Ingrese la sinopsis de la pelicula: ");
+		String sinopsis = teclado.nextLine();
+
+		String fechaSalida = "";
+		do {
+			System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
+			fechaSalida = teclado.nextLine();
+
+			valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
+			if (!valido) {
+				System.out.println(KConstants.Common.NOT_VALID_DATA);
+			} else {
+				fechaSalida = Utiles.parseDate(fechaSalida, KConstants.FormatDate.YYYYMMDDD);
+			}
+
+		} while (!valido);
+
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+		if (!titulo.isEmpty())
+			films.setTitle(titulo);
+		if (!episodio.isEmpty())
+			films.setEpisodeId(episodio);
+		if (!director.isEmpty())
+			films.setDirector(director);
+		if (!productor.isEmpty())
+			films.setProducer(productor);
+		if (!sinopsis.isEmpty())
+			films.setOpeningCrawl(sinopsis);
+		if (!fechaSalida.isEmpty())
+			films.setReleaseDate(fechaSalida);
+		films.setEdited(fechaEdicion);
+		return films;
 	}
 
 	public void findbyName(String title) {
@@ -59,7 +411,6 @@ public class FilmsController implements ICRUDController {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
 			return;
 		}
-		manejador = HandlerBD.getInstance();
 		manejador.tearUp();
 		buscarStarshipsName(title);
 		manejador.tearDown();
@@ -93,7 +444,6 @@ public class FilmsController implements ICRUDController {
 	}
 
 	public static List<Films> getRegisters() {
-		manejador = HandlerBD.getInstance();
 		manejador.tearUp();
 		List<Films> consultaFilms = obtenerRegistros();
 		manejador.tearDown();
@@ -109,6 +459,44 @@ public class FilmsController implements ICRUDController {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
 		return consultaFilms;
+	}
+
+	public static List<Films> cargarPeoples(List<Films> filmsInsertadas) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		List<Films> listaFilms = new ArrayList<Films>();
+		boolean valido = false;
+
+		filmsInsertadas.stream().forEach(Films::imprimeCodValor);
+
+		Optional<Films> filmsEncontrada;
+		do {
+			System.out.println("Ingrese el código del Films: ");
+			final String codigo = teclado.nextLine();
+			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
+
+			if (valido) {
+				filmsEncontrada = filmsInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
+						.findAny();
+
+				if (!filmsEncontrada.isPresent()) {
+					valido = false;
+					System.out.println("El código introducido no es válido");
+				} else {
+					listaFilms.add(filmsEncontrada.get());
+
+					System.out.println("Desea ingresar otra films S/N: ");
+					String otraNave = teclado.nextLine();
+					if ("S".equalsIgnoreCase(otraNave.trim())) {
+						valido = false;
+					} else {
+						valido = true;
+					}
+				}
+			}
+		} while (!valido);
+		return listaFilms;
 	}
 
 }

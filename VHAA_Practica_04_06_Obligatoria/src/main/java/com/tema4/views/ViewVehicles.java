@@ -54,7 +54,7 @@ public class ViewVehicles {
 		System.out.println("2- Insertar vehicle");
 		System.out.println("3- Modificar vehicle");
 		System.out.println("4- Borrar vehicle");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

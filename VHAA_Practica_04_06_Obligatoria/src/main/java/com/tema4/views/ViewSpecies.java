@@ -54,7 +54,7 @@ public class ViewSpecies {
 		System.out.println("2- Insertar especie");
 		System.out.println("3- Modificar especie");
 		System.out.println("4- Borrar especie");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

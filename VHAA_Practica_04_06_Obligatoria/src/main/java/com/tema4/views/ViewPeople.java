@@ -54,7 +54,7 @@ public class ViewPeople {
 		System.out.println("2- Insertar people");
 		System.out.println("3- Modificar people");
 		System.out.println("4- Borrar people");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

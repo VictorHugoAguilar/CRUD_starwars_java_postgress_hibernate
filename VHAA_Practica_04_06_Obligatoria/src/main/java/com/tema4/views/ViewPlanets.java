@@ -54,7 +54,7 @@ public class ViewPlanets {
 		System.out.println("2- Insertar planet");
 		System.out.println("3- Modificar planet");
 		System.out.println("4- Borrar planet");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 }

@@ -9,11 +9,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.tema4.utils.Utiles;
 
@@ -68,6 +71,8 @@ public class Films implements java.io.Serializable {
 	}
 
 	@Id
+	@GenericGenerator(name = "kaugen", strategy = "increment")
+	@GeneratedValue(generator = "kaugen")
 	@Column(name = "codigo", unique = true, nullable = false)
 	public int getCodigo() {
 		return this.codigo;
@@ -149,7 +154,7 @@ public class Films implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "starships_films", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) })
@@ -161,7 +166,7 @@ public class Films implements java.io.Serializable {
 		this.starshipses = starshipses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Planets.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Planets.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "films_planets", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) })
@@ -173,7 +178,7 @@ public class Films implements java.io.Serializable {
 		this.planetses = planetses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "films_people", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
@@ -185,7 +190,7 @@ public class Films implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.DETACH)
 	@JoinTable(name = "vehicles_films", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) })
@@ -209,7 +214,7 @@ public class Films implements java.io.Serializable {
 		StringBuilder sb = new StringBuilder();
 		Integer intCodigo = getCodigo();
 		sb.append(String.format("%-20s", "Código: " + intCodigo));
-		String titles =  getTitle() ;
+		String titles = getTitle();
 		sb.append(String.format("%-40s", "Título: " + titles));
 		String episodio = getEpisodeId();
 		sb.append(String.format("%-20s", "Episodio: " + episodio) + "\n");
@@ -217,27 +222,50 @@ public class Films implements java.io.Serializable {
 		sb.append(String.format("%-40s", "Director: " + directors));
 		String productors = getProducer();
 		sb.append(String.format("%-60s", "Productores: " + productors));
-		sb.append("\nSinopsis: \n" );
+		sb.append("\nSinopsis: \n");
 		String sinopsis = getOpeningCrawl();
-		sb.append(String.format("%-65s", sinopsis));
+		sb.append(String.format("%-65s", sinopsis) + "\n");
 		String creado = getCreated();
-		String personajes ="";
-		int i=1;
-		for(People p : getPeoples()) {
-			if(i%5==0) {
+		String personajes = "";
+		int i = 1;
+		for (People p : getPeoples()) {
+			if (i % 5 == 0) {
 				personajes += "\n";
 			}
-			personajes +=  p.getName() + "   ";
+			personajes += p.getName() + "   ";
 			i++;
 		}
-		if(!personajes.isEmpty()) {
+		if (!personajes.isEmpty()) {
 			sb.append("\nPersonajes del films: \n");
 			sb.append(personajes + "\n");
 		}
-		getPeoples();
-		sb.append(String.format("%-50s", "Creado: " + creado) +"\n");
+		String starships = "";
+		for (Starships s : getStarshipses()) {
+			starships += s.getName() + "   ";
+		}
+		if (!starships.isEmpty()) {
+			sb.append("\nStarships en el film: \n");
+			sb.append(starships + "\n");
+		}
+		String vehicles = "";
+		for (Vehicles v : getVehicleses()) {
+			vehicles += v.getName() + "   ";
+		}
+		if (!vehicles.isEmpty()) {
+			sb.append("\nVehicles en el film: \n");
+			sb.append(vehicles + "\n");
+		}
+		String planets = "";
+		for (Planets p : getPlanetses()) {
+			planets += p.getName() + "   ";
+		}
+		if (!planets.isEmpty()) {
+			sb.append("\nPlanets en el film: \n");
+			sb.append(planets + "\n");
+		}
+		sb.append(String.format("%-50s", "\nCreado: " + creado) + "\n");
 		String editado = getCreated();
-		sb.append(String.format("%-50s", "Editado: " + editado));
+		sb.append(String.format("%-50s", "Editado: " + editado) + "\n");
 		System.out.println(sb.toString());
 	}
 
@@ -245,7 +273,7 @@ public class Films implements java.io.Serializable {
 		StringBuilder sb = new StringBuilder();
 		Integer intCodigo = getCodigo();
 		sb.append(String.format("%-10s", intCodigo));
-		String titles =  getTitle() ;
+		String titles = getTitle();
 		sb.append(String.format("%-30s", titles));
 		String episodio = getEpisodeId();
 		sb.append(String.format("%-10s", episodio));
@@ -262,4 +290,11 @@ public class Films implements java.io.Serializable {
 		System.out.println(sb.toString());
 	}
 
+	public void imprimeCodValor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%-5s", getCodigo()) + " - ");
+		String title = Utiles.formatedTextSize(getTitle(), 30);
+		sb.append(String.format("%-30s", title));
+		System.out.println(sb.toString());
+	}
 }

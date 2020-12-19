@@ -48,9 +48,9 @@ public class ViewConsultaPlanets {
 
 	private void showMenu() {
 		System.out.println("Opciones de Consulta de Planetas: ");
-		System.out.println("1- Buscar especie por nombre");
+		System.out.println("1- Buscar planeta por nombre");
 		System.out.println("2- Mostrar Todas");
-		System.out.println("0- Salir ");
+		System.out.println("0- Volver ");
 	}
 
 	static void presioneTeclaParaContinuar() {

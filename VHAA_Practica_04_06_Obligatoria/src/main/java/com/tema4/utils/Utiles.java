@@ -1,5 +1,11 @@
 package com.tema4.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 import com.tema4.constants.KConstants;
 import com.tema4.models.Films;
 import com.tema4.models.Species;
@@ -128,7 +134,7 @@ public class Utiles {
 		if (cadena.isEmpty() || sizeFormated <= 3) {
 			return textoFormateado;
 		}
-		if(cadena.contains("\n")) {
+		if (cadena.contains("\n")) {
 			cadena = cadena.replace("\n", " ");
 		}
 
@@ -142,8 +148,8 @@ public class Utiles {
 	}
 
 	public static String checkUnknown(String cadena) {
-		String textoCheck = cadena;
-		if (cadena.trim().isEmpty()) {
+		String textoCheck = KConstants.Common.DESCONOCIDO;
+		if (cadena == null || cadena.trim().isEmpty()) {
 			return textoCheck;
 		}
 
@@ -152,7 +158,73 @@ public class Utiles {
 			textoCheck = KConstants.Common.DESCONOCIDO;
 		}
 
-		return textoCheck;
+		return cadena;
+	}
+
+	public static boolean isNumeric(String cadena) {
+		try {
+			Integer.parseInt(cadena);
+			return true;
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+	}
+
+	public static String parseDate(String fechaString, String formatoRequerido) {
+		String nuevoFormato = "";
+		switch (formatoRequerido) {
+		case KConstants.FormatDate.YYYYMMDDD:
+			try {
+				// Formato inicial.
+				SimpleDateFormat formato = new SimpleDateFormat(KConstants.FormatDate.DDMMYYYY);
+				Date d;
+
+				d = formato.parse(fechaString);
+				// Aplica formato requerido.
+				formato.applyPattern(KConstants.FormatDate.YYYYMMDDD);
+				nuevoFormato = formato.format(d);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+
+			break;
+		case KConstants.FormatDate.DDMMYYYY:
+			try {
+				// Formato inicial.
+				SimpleDateFormat formato = new SimpleDateFormat(KConstants.FormatDate.YYYYMMDDD);
+				Date d;
+
+				d = formato.parse(fechaString);
+				// Aplica formato requerido.
+				formato.applyPattern(KConstants.FormatDate.DDMMYYYY);
+				nuevoFormato = formato.format(d);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			break;
+		case KConstants.FormatDate.FORMAT_BD:
+			try {
+				// Formato inicial.
+				SimpleDateFormat formato = new SimpleDateFormat(KConstants.FormatDate.FORMAT_SYS, Locale.US);
+				Date d;
+
+				d = formato.parse(fechaString);
+				// Aplica formato requerido.
+				formato.applyPattern(KConstants.FormatDate.FORMAT_BD);
+				nuevoFormato = formato.format(d);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		default:
+			break;
+		}
+
+		return nuevoFormato;
+	}
+
+	public static boolean isFormatedDateOk(String fechaString) {
+		String regexp = "^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
+		return Pattern.matches(regexp, fechaString);
 	}
 
 }
