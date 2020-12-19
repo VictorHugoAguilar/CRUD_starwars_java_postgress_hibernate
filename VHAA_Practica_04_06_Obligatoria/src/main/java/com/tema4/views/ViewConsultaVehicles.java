@@ -2,12 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaVehiclesController;
+import com.tema4.controller.VehiclesController;
 
 public class ViewConsultaVehicles {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static VehiclesController vehiclesController;
 
 	private ViewConsultaVehicles() {
+		vehiclesController = VehiclesController.getInstance();
 		menuOpciones();
 	}
 
@@ -26,11 +28,11 @@ public class ViewConsultaVehicles {
 			case "1":
 				System.out.println("Ingrese el nombre del Vehículo a buscar");
 				String name = teclado.nextLine();
-				ConsultaVehiclesController.getVehiclesByName(name);
+				vehiclesController.findbyName(name);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaVehiclesController.showRegisters();
+				vehiclesController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

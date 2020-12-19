@@ -2,12 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaPeopleController;
+import com.tema4.controller.PeopleController;
 
 public class ViewConsultaPeople {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static PeopleController peopleController;
 
 	private ViewConsultaPeople() {
+		peopleController = PeopleController.getInstance();
+		teclado = new Scanner(System.in);
 		menuOpciones();
 	}
 
@@ -17,7 +20,6 @@ public class ViewConsultaPeople {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,23 +28,23 @@ public class ViewConsultaPeople {
 			case "1":
 				System.out.println("Ingrese el nombre de personaje a buscar");
 				String name = teclado.nextLine();
-				ConsultaPeopleController.getPeoplesByName(name);
+				peopleController.findbyName(name);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaPeopleController.getPeopleWithoutSpecies();
+				peopleController.getPeopleWithoutSpecies();
 				presioneTeclaParaContinuar();
 				break;
 			case "3":
-				ConsultaPeopleController.getPeopleMoreFilmsParticipated();
+				peopleController.getPeopleMoreFilmsParticipated();
 				presioneTeclaParaContinuar();
 				break;
 			case "4":
-				ConsultaPeopleController.getMoreRepeatedHair();
+				peopleController.getMoreRepeatedHair();
 				presioneTeclaParaContinuar();
 				break;
 			case "5":
-				ConsultaPeopleController.showRegisters() ;
+				peopleController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

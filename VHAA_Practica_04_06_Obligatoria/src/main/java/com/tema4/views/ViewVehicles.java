@@ -2,11 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-public class ViewVehicles {
+import com.tema4.controller.VehiclesController;
 
-	public static Scanner teclado;
+public class ViewVehicles {
+	private static VehiclesController vehiclesController;
+	private static Scanner teclado;
 
 	private ViewVehicles() {
+		teclado = new Scanner(System.in);
+		vehiclesController = VehiclesController.getInstance();
 		menuOpciones();
 	}
 
@@ -16,7 +20,6 @@ public class ViewVehicles {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,10 +29,13 @@ public class ViewVehicles {
 				ViewConsultaVehicles.getInstance();
 				break;
 			case "2":
+				vehiclesController.create();
 				break;
 			case "3":
+				vehiclesController.update();
 				break;
 			case "4":
+				vehiclesController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");

@@ -2,10 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
+import com.tema4.controller.PlanetsController;
+
 public class ViewPlanets {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static PlanetsController planetsController;
 
 	private ViewPlanets() {
+		planetsController = PlanetsController.getIntance();
 		menuOpciones();
 	}
 
@@ -25,10 +29,13 @@ public class ViewPlanets {
 				ViewConsultaPlanets.getInstance();
 				break;
 			case "2":
+				planetsController.create();
 				break;
 			case "3":
+				planetsController.update();
 				break;
 			case "4":
+				planetsController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");

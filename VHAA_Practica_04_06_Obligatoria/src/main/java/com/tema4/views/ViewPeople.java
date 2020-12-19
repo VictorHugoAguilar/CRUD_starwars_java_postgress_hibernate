@@ -2,10 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
+import com.tema4.controller.PeopleController;
+
 public class ViewPeople {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static PeopleController peopleController;
 
 	private ViewPeople() {
+		peopleController = PeopleController.getInstance();
 		menuOpciones();
 	}
 
@@ -25,10 +29,13 @@ public class ViewPeople {
 				ViewConsultaPeople.getInstance();
 				break;
 			case "2":
+				peopleController.create();
 				break;
 			case "3":
+				peopleController.update();
 				break;
 			case "4":
+				peopleController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");

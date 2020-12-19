@@ -2,12 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaSpecieController;
+import com.tema4.controller.SpeciesController;
 
 public class ViewConsultaSpecie {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static SpeciesController speciesController;
 
 	private ViewConsultaSpecie() {
+		speciesController = SpeciesController.getInstance();
+		teclado = new Scanner(System.in);
 		menuOpciones();
 	}
 
@@ -17,7 +20,6 @@ public class ViewConsultaSpecie {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,15 +28,15 @@ public class ViewConsultaSpecie {
 			case "1":
 				System.out.println("Ingrese el nombre de la especie a buscar");
 				String name = teclado.nextLine();
-				ConsultaSpecieController.getSpecieByName(name);
+				speciesController.findbyName(name);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaSpecieController.getSpeciesWithoutPeople();
+				speciesController.getSpeciesWithoutPeople();
 				presioneTeclaParaContinuar();
 				break;
 			case "3":
-				ConsultaSpecieController.showRegisters();
+				speciesController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

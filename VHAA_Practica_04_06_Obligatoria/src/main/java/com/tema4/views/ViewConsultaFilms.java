@@ -2,12 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaFilmsController;
+import com.tema4.controller.FilmsController;
 
 public class ViewConsultaFilms {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static FilmsController filmsController;
 
 	private ViewConsultaFilms() {
+		filmsController = FilmsController.getInstance();
+		teclado = new Scanner(System.in);
 		menuOpciones();
 	}
 
@@ -17,7 +20,6 @@ public class ViewConsultaFilms {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,11 +28,11 @@ public class ViewConsultaFilms {
 			case "1":
 				System.out.println("Ingrese el título del Films a buscar");
 				String title = teclado.nextLine();
-				ConsultaFilmsController.getStarshipsByName(title);
+				filmsController.findbyName(title);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaFilmsController.showRegisters();
+				filmsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

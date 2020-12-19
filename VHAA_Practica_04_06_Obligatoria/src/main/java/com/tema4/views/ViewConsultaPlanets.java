@@ -2,12 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaPlanetsController;
+import com.tema4.controller.PlanetsController;
 
 public class ViewConsultaPlanets {
-	public static Scanner teclado;
+	private static Scanner teclado;
+	private static PlanetsController planetsController;
 
 	private ViewConsultaPlanets() {
+		planetsController =  PlanetsController.getIntance();
 		menuOpciones();
 	}
 
@@ -26,11 +28,11 @@ public class ViewConsultaPlanets {
 			case "1":
 				System.out.println("Ingrese el nombre del Planeta a buscar");
 				String name = teclado.nextLine();
-				ConsultaPlanetsController.getPlanetByName(name);
+				planetsController.findbyName(name);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaPlanetsController.showRegisters();
+				planetsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

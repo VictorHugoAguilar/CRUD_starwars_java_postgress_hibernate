@@ -2,11 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-public class ViewSpecies {
+import com.tema4.controller.SpeciesController;
 
-	public static Scanner teclado;
+public class ViewSpecies {
+	private static SpeciesController speciesController;
+	private static Scanner teclado;
 
 	private ViewSpecies() {
+		speciesController = SpeciesController.getInstance();
+		teclado = new Scanner(System.in);
 		menuOpciones();
 	}
 
@@ -16,7 +20,6 @@ public class ViewSpecies {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,10 +29,13 @@ public class ViewSpecies {
 				ViewConsultaSpecie.getInstance();
 				break;
 			case "2":
+				speciesController.create();
 				break;
 			case "3":
+				speciesController.update();
 				break;
 			case "4":
+				speciesController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");

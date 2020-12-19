@@ -2,12 +2,15 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-import com.tema4.controller.ConsultaStarshipsController;
+import com.tema4.controller.StarshipsController;
 
 public class ViewConsultaStarships {
-	public static Scanner teclado;
+	private static StarshipsController starshipsController;
+	private static Scanner teclado;
 
 	private ViewConsultaStarships() {
+		starshipsController = StarshipsController.getInstance();
+		teclado = new Scanner(System.in);
 		menuOpciones();
 	}
 
@@ -17,7 +20,6 @@ public class ViewConsultaStarships {
 
 	private void menuOpciones() {
 		boolean terminado = false;
-		teclado = new Scanner(System.in);
 
 		do {
 			showMenu();
@@ -26,11 +28,11 @@ public class ViewConsultaStarships {
 			case "1":
 				System.out.println("Ingrese el nombre de la Starships a buscar");
 				String name = teclado.nextLine();
-				ConsultaStarshipsController.getStarshipsByName(name);
+				starshipsController.findbyName(name);
 				presioneTeclaParaContinuar();
 				break;
 			case "2":
-				ConsultaStarshipsController.showRegisters();
+				starshipsController.showRegisters();
 				presioneTeclaParaContinuar();
 				break;
 			case "0":

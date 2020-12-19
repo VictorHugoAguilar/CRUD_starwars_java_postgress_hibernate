@@ -2,11 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-public class ViewFilms {
+import com.tema4.controller.FilmsController;
 
-	public static Scanner teclado;
+public class ViewFilms {
+	private static Scanner teclado;
+	private static FilmsController filmsController;
 
 	private ViewFilms() {
+		filmsController = FilmsController.getInstance();
 		menuOpciones();
 	}
 
@@ -26,10 +29,13 @@ public class ViewFilms {
 				ViewConsultaFilms.getInstance();
 				break;
 			case "2":
+				filmsController.create();
 				break;
 			case "3":
+				filmsController.update();
 				break;
 			case "4":
+				filmsController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");

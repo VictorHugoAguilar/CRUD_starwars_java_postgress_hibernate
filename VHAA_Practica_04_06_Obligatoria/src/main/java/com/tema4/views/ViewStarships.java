@@ -2,11 +2,14 @@ package com.tema4.views;
 
 import java.util.Scanner;
 
-public class ViewStarships {
+import com.tema4.controller.StarshipsController;
 
-	public static Scanner teclado;
+public class ViewStarships {
+	private static StarshipsController starshipsController;
+	private static Scanner teclado;
 
 	private ViewStarships() {
+		starshipsController = StarshipsController.getInstance();
 		menuOpciones();
 	}
 
@@ -26,10 +29,13 @@ public class ViewStarships {
 				ViewConsultaStarships.getInstance();
 				break;
 			case "2":
+				starshipsController.create();
 				break;
 			case "3":
+				starshipsController.update();
 				break;
 			case "4":
+				starshipsController.delete();
 				break;
 			case "0":
 				System.out.println("Fin de la ejecución...");
