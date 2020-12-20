@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.Transaction;
 
 import com.tema4.constants.KConstants;
@@ -17,6 +19,15 @@ import com.tema4.models.Vehicles;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+/**
+ * Controlador de VehiclesController
+ * 
+ * Clase que controla el CRUD completo para la clase Vehicle
+ * 
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 @SuppressWarnings("unchecked")
 public class VehiclesController implements ICRUDController {
 	private static VehiclesController vehiclesController;
@@ -36,33 +47,103 @@ public class VehiclesController implements ICRUDController {
 		return vehiclesController;
 	}
 
-	@Override
+	/**
+	 * Método: Create
+	 * 
+	 * Creación de un registro del tipo Vehicles con sus relaciones
+	 */
 	public void create() {
 		manejador.tearUp();
-		String deseaIngresar = "";
-		Transaction trans = manejador.session.beginTransaction();
+		try {
+			Transaction trans = manejador.session.beginTransaction();
 
-		Vehicles vehicleToInsert = getVehicleToInsert();
-		manejador.session.save(vehicleToInsert);
-		Set<Vehicles> vehicle = new HashSet<Vehicles>();
-		vehicle.add(vehicleToInsert);
+			Vehicles vehicleToInsert = getVehicleToInsert();
+			manejador.session.save(vehicleToInsert);
+			Set<Vehicles> vehicle = new HashSet<Vehicles>();
+			vehicle.add(vehicleToInsert);
 
-		System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setVehicleses(vehicle);
-					manejador.session.save(people);
-				});
-			}
+			insertPeopleVehicle(vehicle);
+			insertFilmVehicle(vehicle);
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+		} catch (PersistenceException e) {
+			System.err.println("Fallo en el insert en la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
+	}
 
+	/**
+	 * Método: Delete
+	 * 
+	 * Eliminación de un registro del tipo Planet no elimina sus relaciones
+	 */
+	public void delete() {
+		manejador.tearUp();
+		try {
+			Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
+
+			if (vehicleEncontrado.isPresent()) {
+				System.out.println(KConstants.Common.ARE_YOU_SURE);
+				String seguro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(seguro.trim())) {
+					Transaction trans = manejador.session.beginTransaction();
+					manejador.session.delete(vehicleEncontrado.get());
+					trans.commit();
+					System.out.println("Vehicle borrado...");
+				}
+			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en el borrado por contener una clave foránea");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+		manejador.tearDown();
+	}
+
+	/**
+	 * Método: Update
+	 * 
+	 * Modificación de un registro del tipo Vehicles
+	 */
+	public void update() {
+		manejador.tearUp();
+		try {
+			Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
+
+			if (vehicleEncontrado.isPresent()) {
+				Transaction trans = manejador.session.beginTransaction();
+
+				Vehicles vehicleToUpdate = getVehicleToUpdate(vehicleEncontrado.get());
+				manejador.session.save(vehicleToUpdate);
+				Set<Vehicles> vehicle = new HashSet<Vehicles>();
+				vehicle.add(vehicleToUpdate);
+
+				insertPeopleVehicle(vehicle);
+
+				insertFilmVehicle(vehicle);
+
+				trans.commit();
+				System.out.println("registro modificado...");
+
+			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en la consulta de actualización a la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+		manejador.tearDown();
+	}
+
+	/**
+	 * Método: Insert film in vehicles
+	 * 
+	 * @param vehicle
+	 */
+	private void insertFilmVehicle(Set<Vehicles> vehicle) {
+		String deseaIngresar;
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
@@ -78,12 +159,38 @@ public class VehiclesController implements ICRUDController {
 				});
 			}
 		}
-
-		trans.commit();
-		System.out.println("registro ingresado...");
-		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Insert people in vehicles
+	 * 
+	 * @param vehicle
+	 */
+	private void insertPeopleVehicle(Set<Vehicles> vehicle) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM People";
+			List<People> peoplesInsertadas = new ArrayList<People>();
+			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			if (!listaPeoples.isEmpty()) {
+				listaPeoples.stream().forEach(people -> {
+					people.setCodigo(people.getCodigo());
+					people.setVehicleses(vehicle);
+					manejador.session.save(people);
+				});
+			}
+		}
+	}
+
+	/**
+	 * Método: Constructor de un objeto del tipo vehicle con los datos pasados por
+	 * el usuario
+	 * 
+	 * @return Vehicles
+	 */
 	private Vehicles getVehicleToInsert() {
 		Vehicles vehicle = new Vehicles();
 		boolean valido = false;
@@ -169,24 +276,11 @@ public class VehiclesController implements ICRUDController {
 		return vehicle;
 	}
 
-	@Override
-	public void delete() {
-		manejador.tearUp();
-		Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
-
-		if (vehicleEncontrado.isPresent()) {
-			System.out.println(KConstants.Common.ARE_YOU_SURE);
-			String seguro = teclado.nextLine();
-			if ("S".equalsIgnoreCase(seguro.trim())) {
-				Transaction trans = manejador.session.beginTransaction();
-				manejador.session.delete(vehicleEncontrado.get());
-				trans.commit();
-				System.out.println("Vehicle borrado...");
-			}
-		}
-		manejador.tearDown();
-	}
-
+	/**
+	 * Método: Obtener un objeto a partir del código seleccionado por el usuario
+	 * 
+	 * @return Optional<Vehicles>
+	 */
 	private static Optional<Vehicles> getVehicleFromInsert() {
 		Optional<Vehicles> vehicleEncontrado = Optional.empty();
 
@@ -213,59 +307,12 @@ public class VehiclesController implements ICRUDController {
 		return vehicleEncontrado;
 	}
 
-	@Override
-	public void update() {
-		manejador.tearUp();
-		Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
-
-		if (vehicleEncontrado.isPresent()) {
-			String deseaIngresar = "";
-			Transaction trans = manejador.session.beginTransaction();
-
-			Vehicles vehicleToUpdate = getVehicleToUpdate(vehicleEncontrado.get());
-			manejador.session.save(vehicleToUpdate);
-			Set<Vehicles> vehicle = new HashSet<Vehicles>();
-			vehicle.add(vehicleToUpdate);
-
-			System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM People";
-				List<People> peoplesInsertadas = new ArrayList<People>();
-				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
-				if (!listaPeoples.isEmpty()) {
-					listaPeoples.stream().forEach(people -> {
-						people.setCodigo(people.getCodigo());
-						people.setVehicleses(vehicle);
-						manejador.session.save(people);
-					});
-				}
-			}
-
-			System.out.println("Desea ingresar films donde aparece S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Films";
-				List<Films> filmsInsertadas = new ArrayList<Films>();
-				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
-				if (!listaFilms.isEmpty()) {
-					listaFilms.stream().forEach(film -> {
-						film.setCodigo(film.getCodigo());
-						film.setVehicleses(vehicle);
-						manejador.session.save(film);
-					});
-				}
-			}
-
-			trans.commit();
-			System.out.println("registro modificado...");
-
-		}
-		manejador.tearDown();
-	}
-
+	/**
+	 * Método: Modificamos el objeto del tipo Vehicles con datos pasado por el
+	 * usuario
+	 * 
+	 * @return Vehicles
+	 */
 	private Vehicles getVehicleToUpdate(Vehicles vehicle) {
 		System.out.println("Ingrese el nombre: ");
 		String nombre = teclado.nextLine();
@@ -318,20 +365,28 @@ public class VehiclesController implements ICRUDController {
 		return vehicle;
 	}
 
+	/**
+	 * Método: Buscar por nombre, método expuesto
+	 */
 	public void findbyName(String name) {
 		if (name.trim().isEmpty()) {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
 			return;
 		}
-		manejador = HandlerBD.getInstance();
-		manejador.tearUp();
 		buscarVehicleName(name);
-		manejador.tearDown();
 	}
 
+	/**
+	 * Método para obtener los vehiculos a partir de un nombre pasado, método no
+	 * expuesto
+	 * 
+	 * @param name
+	 */
 	private static void buscarVehicleName(String name) {
-		final String sqlQuery = "FROM Vehicles where UPPER(name) like '%" + name.toUpperCase() + "%'";
+		manejador.tearUp();
 		try {
+
+			final String sqlQuery = "FROM Vehicles where UPPER(name) like '%" + name.toUpperCase() + "%'";
 			List<Vehicles> consultaVehicles = manejador.session.createQuery(sqlQuery).list();
 			if (consultaVehicles.isEmpty()) {
 				System.out.println(KConstants.Common.NOT_REGISTER + " para el nombre " + name);
@@ -341,12 +396,21 @@ public class VehiclesController implements ICRUDController {
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Muestra todos los registros, método expuesto
+	 */
 	public void showRegisters() {
 		mostrarTodos(getRegisters());
 	}
 
+	/**
+	 * Método: Imprime la lista de vehicles
+	 * 
+	 * @param consultaVehicles
+	 */
 	private static void mostrarTodos(List<Vehicles> consultaVehicles) {
 		if (consultaVehicles.isEmpty()) {
 			System.out.println(KConstants.Common.NOT_REGISTER);
@@ -356,8 +420,12 @@ public class VehiclesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtener todos los registro, método expuesto
+	 * 
+	 * @return
+	 */
 	public static List<Vehicles> getRegisters() {
-		manejador = HandlerBD.getInstance();
 		manejador.tearUp();
 		List<Vehicles> consultaVehicles = obtenerRegistros();
 		manejador.tearDown();
@@ -365,10 +433,15 @@ public class VehiclesController implements ICRUDController {
 		return consultaVehicles;
 	}
 
+	/**
+	 * Método: obtener la lista de vehicles completa
+	 * 
+	 * @return List<Vehicles>
+	 */
 	private static List<Vehicles> obtenerRegistros() {
-		final String sqlQuery = "FROM Vehicles";
 		List<Vehicles> consultaVehicles = new ArrayList<Vehicles>();
 		try {
+			final String sqlQuery = "FROM Vehicles";
 			consultaVehicles = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -376,6 +449,12 @@ public class VehiclesController implements ICRUDController {
 		return consultaVehicles;
 	}
 
+	/**
+	 * Método: Carga a partir de una lista los seleccionados.
+	 * 
+	 * @param vehiclesInsertados
+	 * @return List<Vehicles>
+	 */
 	public static List<Vehicles> cargarVehicles(List<Vehicles> vehiclesInsertados) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);

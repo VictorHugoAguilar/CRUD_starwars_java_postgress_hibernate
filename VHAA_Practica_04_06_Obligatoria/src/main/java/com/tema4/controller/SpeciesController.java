@@ -9,6 +9,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.Transaction;
 
 import com.tema4.constants.KConstants;
@@ -18,6 +20,14 @@ import com.tema4.models.Species;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+/**
+ * Controlador de SpeciesController
+ * 
+ * Clase que controla el CRUD completo para la clase Species
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 @SuppressWarnings("unchecked")
 public class SpeciesController implements ICRUDController {
 	private static SpeciesController speciesController;
@@ -37,30 +47,100 @@ public class SpeciesController implements ICRUDController {
 		return speciesController;
 	}
 
-	@Override
+	/**
+	 * Método: Create
+	 * 
+	 * Creación de un registro del tipo Species con sus relaciones
+	 */
 	public void create() {
 		manejador.tearUp();
-		String deseaIngresar = "";
-		Transaction trans = manejador.session.beginTransaction();
+		try {
+			Transaction trans = manejador.session.beginTransaction();
 
-		Species specieToInsert = getSpecieToInsert();
+			Species specieToInsert = getSpecieToInsert();
 
-		System.out.println("Desea ingresar el planeta de la especie S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Planets> planetsInsertados = new ArrayList<Planets>();
-			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
-			if (planet != null) {
-				specieToInsert.setPlanets(planet);
-			}
+			insertSpeciePlanet(specieToInsert);
+
+			manejador.session.save(specieToInsert);
+			Set<Species> species = new HashSet<Species>();
+			species.add(specieToInsert);
+
+			insertSpeciePeople(species);
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+		} catch (PersistenceException e) {
+			System.err.println("Fallo en el insert en la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
+	}
 
-		manejador.session.save(specieToInsert);
-		Set<Species> species = new HashSet<Species>();
-		species.add(specieToInsert);
+	/**
+	 * Método: Delete
+	 * 
+	 * Eliminación de un registro del tipo Species no elimina sus relaciones
+	 */
+	public void delete() {
+		try {
+			manejador.tearUp();
+			Optional<Species> speciesEncontrado = getSpecieFromInsert();
 
+			if (speciesEncontrado.isPresent()) {
+				System.out.println(KConstants.Common.ARE_YOU_SURE);
+				String seguro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(seguro.trim())) {
+					Transaction trans = manejador.session.beginTransaction();
+					manejador.session.delete(speciesEncontrado.get());
+					trans.commit();
+					System.out.println("Films borrado...");
+				}
+			}
+			manejador.tearDown();
+		} catch (PersistenceException e) {
+			System.err.println("Error en el borrado por contener una clave foránea");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+	}
+
+	/**
+	 * Método: Update
+	 * 
+	 * Modificación de un registro del tipo Species
+	 */
+	public void update() {
+		manejador.tearUp();
+		try {
+			Optional<Species> speciesEncontrado = getSpecieFromInsert();
+
+			if (speciesEncontrado.isPresent()) {
+				Transaction trans = manejador.session.beginTransaction();
+
+				Species specieToUpdate = getSpecieToUpdate(speciesEncontrado.get());
+
+				insertSpeciePlanet(specieToUpdate);
+
+				manejador.session.save(specieToUpdate);
+				Set<Species> species = new HashSet<Species>();
+				species.add(specieToUpdate);
+
+				insertSpeciePeople(species);
+
+				trans.commit();
+				System.out.println("registro ingresado...");
+			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en la consulta de actualización a la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+		manejador.tearDown();
+	}
+
+	private void insertSpeciePeople(Set<Species> species) {
+		String deseaIngresar;
 		System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
@@ -76,10 +156,21 @@ public class SpeciesController implements ICRUDController {
 				});
 			}
 		}
+	}
 
-		trans.commit();
-		System.out.println("registro ingresado...");
-		manejador.tearDown();
+	private void insertSpeciePlanet(Species specieToInsert) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar el planeta de la especie S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Planets";
+			List<Planets> planetsInsertados = new ArrayList<Planets>();
+			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
+			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
+			if (planet != null) {
+				specieToInsert.setPlanets(planet);
+			}
+		}
 	}
 
 	private Species getSpecieToInsert() {
@@ -170,24 +261,6 @@ public class SpeciesController implements ICRUDController {
 		return specie;
 	}
 
-	@Override
-	public void delete() {
-		manejador.tearUp();
-		Optional<Species> speciesEncontrado = getSpecieFromInsert();
-
-		if (speciesEncontrado.isPresent()) {
-			System.out.println(KConstants.Common.ARE_YOU_SURE);
-			String seguro = teclado.nextLine();
-			if ("S".equalsIgnoreCase(seguro.trim())) {
-				Transaction trans = manejador.session.beginTransaction();
-				manejador.session.delete(speciesEncontrado.get());
-				trans.commit();
-				System.out.println("Films borrado...");
-			}
-		}
-		manejador.tearDown();
-	}
-
 	private static Optional<Species> getSpecieFromInsert() {
 		Optional<Species> speciesEncontrado = Optional.empty();
 
@@ -212,55 +285,6 @@ public class SpeciesController implements ICRUDController {
 			}
 		} while (!valido);
 		return speciesEncontrado;
-	}
-
-	@Override
-	public void update() {
-		manejador.tearUp();
-		Optional<Species> speciesEncontrado = getSpecieFromInsert();
-
-		if (speciesEncontrado.isPresent()) {
-			String deseaIngresar = "";
-			Transaction trans = manejador.session.beginTransaction();
-
-			Species specieToUpdate = getSpecieToUpdate(speciesEncontrado.get());
-
-			System.out.println("Desea ingresar el planeta de la especie S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Planets";
-				List<Planets> planetsInsertados = new ArrayList<Planets>();
-				planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-				Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
-				if (planet != null) {
-					specieToUpdate.setPlanets(planet);
-				}
-			}
-
-			manejador.session.save(specieToUpdate);
-			Set<Species> species = new HashSet<Species>();
-			species.add(specieToUpdate);
-
-			System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM People";
-				List<People> peoplesInsertadas = new ArrayList<People>();
-				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
-				if (!listaPeoples.isEmpty()) {
-					listaPeoples.stream().forEach(people -> {
-						people.setCodigo(people.getCodigo());
-						people.setSpecieses(species);
-						manejador.session.save(people);
-					});
-				}
-			}
-
-			trans.commit();
-			System.out.println("registro ingresado...");
-		}
-		manejador.tearDown();
 	}
 
 	private Species getSpecieToUpdate(Species species) {
@@ -335,9 +359,15 @@ public class SpeciesController implements ICRUDController {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
 			return;
 		}
-		manejador.tearUp();
-		buscarSpecieName(name);
-		manejador.tearDown();
+		try {
+			manejador.tearUp();
+			buscarSpecieName(name);
+			manejador.tearDown();
+		} catch (PersistenceException e) {
+			System.err.println("Fallo en el insert en la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
 	}
 
 	private static void buscarSpecieName(String name) {
@@ -350,7 +380,7 @@ public class SpeciesController implements ICRUDController {
 				consultaSpecies.stream().forEach(Species::imprimeRegistroDetallado);
 			}
 		} catch (Exception e) {
-			System.out.println(KConstants.Common.FAIL_CONECTION);
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
 	}
 
@@ -361,8 +391,8 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	private static void mostrarEspeciesSinPersonajes() {
-		final String sqlQuery = "FROM Species";
 		try {
+			final String sqlQuery = "FROM Species";
 			List<Species> consultaSpecies = manejador.session.createQuery(sqlQuery).list();
 			List<Species> speciesSinPersonajes = consultaSpecies.stream().filter(s -> s.getPeoples().isEmpty())
 					.collect(Collectors.toList());
@@ -399,9 +429,9 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	private static List<Species> obtenerRegistros() {
-		final String sqlQuery = "FROM Species";
 		List<Species> consultaSpecies = new ArrayList<Species>();
 		try {
+			final String sqlQuery = "FROM Species";
 			consultaSpecies = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -420,7 +450,7 @@ public class SpeciesController implements ICRUDController {
 
 		Optional<Species> especieEncontrada;
 		do {
-			System.out.println("Ingrese el código del People: ");
+			System.out.println("Ingrese el código de Specie: ");
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -434,7 +464,7 @@ public class SpeciesController implements ICRUDController {
 				} else {
 					listaSpecies.add(especieEncontrada.get());
 
-					System.out.println("Desea ingresar otra People S/N");
+					System.out.println("Desea ingresar otra Specie S/N");
 					String otraNave = teclado.nextLine();
 					if ("S".equalsIgnoreCase(otraNave.trim())) {
 						valido = false;

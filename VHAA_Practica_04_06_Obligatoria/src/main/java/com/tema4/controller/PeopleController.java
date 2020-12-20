@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.Transaction;
 
 import com.tema4.constants.KConstants;
@@ -20,6 +22,15 @@ import com.tema4.models.Vehicles;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+/**
+ * Controlador de PeopleController
+ * 
+ * Clase que controla el CRUD completo para la clase People
+ * 
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 @SuppressWarnings("unchecked")
 public class PeopleController implements ICRUDController {
 	static PeopleController peopleController;
@@ -39,75 +50,111 @@ public class PeopleController implements ICRUDController {
 		return peopleController;
 	}
 
-	@Override
+	/**
+	 * Método: Create
+	 * 
+	 * Creación de un registro del tipo People con sus relaciones
+	 */
 	public void create() {
 		manejador.tearUp();
-		String deseaIngresar = "";
-		Transaction trans = manejador.session.beginTransaction();
+		try {
+			Transaction trans = manejador.session.beginTransaction();
 
-		People peopleToInsert = getPeopleToInsert();
+			People peopleToInsert = getPeopleToInsert();
 
-		System.out.println("Desea ingresar el planeta del people S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Planets> planetsInsertados = new ArrayList<Planets>();
-			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
-			if (planet != null) {
-				peopleToInsert.setPlanets(planet);
-			}
+			insertPlanetPeople(peopleToInsert);
+
+			manejador.session.save(peopleToInsert);
+			Set<People> peoples = new HashSet<People>();
+			peoples.add(peopleToInsert);
+
+			insertStarshipPeople(peoples);
+			insertVehiclesPeople(peoples);
+			insertSpeciePeople(peoples);
+			insertFilmPeople(peoples);
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+		} catch (PersistenceException e) {
+			System.err.println("Fallo en el insert en la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
+	}
 
-		manejador.session.save(peopleToInsert);
-		Set<People> peoples = new HashSet<People>();
-		peoples.add(peopleToInsert);
+	/**
+	 * Método: Delete
+	 * 
+	 * Eliminación de un registro del tipo People no elimina sus relaciones
+	 */
+	public void delete() {
+		manejador.tearUp();
+		try {
+			Optional<People> peopleEncontrado = getPeopleFromInserts();
 
-		System.out.println("Desea ingresar starships que conduce S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Starships";
-			List<Starships> navesInsertadas = new ArrayList<Starships>();
-			navesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
-			if (!listaNaves.isEmpty()) {
-				listaNaves.stream().forEach(nave -> {
-					nave.setPeoples(peoples);
-					manejador.session.save(nave);
-				});
+			if (peopleEncontrado.isPresent()) {
+				System.out.println(KConstants.Common.ARE_YOU_SURE);
+				String seguro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(seguro.trim())) {
+					Transaction trans = manejador.session.beginTransaction();
+					manejador.session.delete(peopleEncontrado.get());
+					trans.commit();
+					System.out.println("People borrado...");
+				}
 			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en el borrado por contener una clave foránea");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
+	}
 
-		System.out.println("Desea ingresar vehicles que conduce S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Vehicles";
-			List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
-			vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
-			if (!listaVehicles.isEmpty()) {
-				listaVehicles.stream().forEach(vehicle -> {
-					vehicle.setPeoples(peoples);
-					manejador.session.save(vehicle);
-				});
+	/**
+	 * Método: Update
+	 * 
+	 * Modificación de un registro del tipo Planet
+	 */
+	public void update() {
+		manejador.tearUp();
+		try {
+			Optional<People> peopleEncontrado = getPeopleFromInserts();
+
+			if (peopleEncontrado.isPresent()) {
+				Transaction trans = manejador.session.beginTransaction();
+
+				People peopleToUpdate = getPeopleToUpdate(peopleEncontrado.get());
+
+				insertPlanetPeople(peopleToUpdate);
+
+				manejador.session.save(peopleToUpdate);
+				Set<People> peoples = new HashSet<People>();
+				peoples.add(peopleToUpdate);
+
+				insertStarshipPeople(peoples);
+				insertVehiclesPeople(peoples);
+				insertSpeciePeople(peoples);
+				insertFilmPeople(peoples);
+
+				trans.commit();
+				System.out.println("registro modificado...");
 			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en la consulta de actualización a la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
+	}
 
-		System.out.println("Desea ingresar especies en el people S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Species> speciesInsertadas = new ArrayList<Species>();
-			speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
-			if (!listaSpecies.isEmpty()) {
-				listaSpecies.stream().forEach(specie -> {
-					specie.setPeoples(peoples);
-					manejador.session.save(specie);
-				});
-			}
-		}
-
+	/**
+	 * Método: Insert film in people
+	 * 
+	 * @param peoples
+	 */
+	private void insertFilmPeople(Set<People> peoples) {
+		String deseaIngresar;
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
@@ -123,12 +170,103 @@ public class PeopleController implements ICRUDController {
 				});
 			}
 		}
-
-		trans.commit();
-		System.out.println("registro ingresado...");
-		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Insert species in people
+	 * 
+	 * @param peoples
+	 */
+	private void insertSpeciePeople(Set<People> peoples) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar especies en el people S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Species";
+			List<Species> speciesInsertadas = new ArrayList<Species>();
+			speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
+			if (!listaSpecies.isEmpty()) {
+				listaSpecies.stream().forEach(specie -> {
+					specie.setPeoples(peoples);
+					manejador.session.save(specie);
+				});
+			}
+		}
+	}
+
+	/**
+	 * Método: Insert vehicles in people
+	 * 
+	 * @param peoples
+	 */
+	private void insertVehiclesPeople(Set<People> peoples) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar vehicles que conduce S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Vehicles";
+			List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
+			vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
+			if (!listaVehicles.isEmpty()) {
+				listaVehicles.stream().forEach(vehicle -> {
+					vehicle.setPeoples(peoples);
+					manejador.session.save(vehicle);
+				});
+			}
+		}
+	}
+
+	/**
+	 * Método: Insert starships in people
+	 * 
+	 * @param peoples
+	 */
+	private void insertStarshipPeople(Set<People> peoples) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar starships que conduce S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Starships";
+			List<Starships> navesInsertadas = new ArrayList<Starships>();
+			navesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
+			if (!listaNaves.isEmpty()) {
+				listaNaves.stream().forEach(nave -> {
+					nave.setPeoples(peoples);
+					manejador.session.save(nave);
+				});
+			}
+		}
+	}
+
+	/**
+	 * Método: Insert planet in people
+	 * 
+	 * @param peopleToInsert
+	 */
+	private void insertPlanetPeople(People peopleToInsert) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar el planeta del people S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM Planets";
+			List<Planets> planetsInsertados = new ArrayList<Planets>();
+			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
+			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
+			if (planet != null) {
+				peopleToInsert.setPlanets(planet);
+			}
+		}
+	}
+
+	/**
+	 * Método: obtener un objeto del tipo People, con los datos obtenidos del
+	 * usuario
+	 * 
+	 * @return People
+	 */
 	private People getPeopleToInsert() {
 		People people = new People();
 		boolean valido = false;
@@ -175,118 +313,12 @@ public class PeopleController implements ICRUDController {
 		return people;
 	}
 
-	@Override
-	public void delete() {
-		manejador.tearUp();
-		Optional<People> peopleEncontrado = getPeopleFromInserts();
-
-		if (peopleEncontrado.isPresent()) {
-			System.out.println(KConstants.Common.ARE_YOU_SURE);
-			String seguro = teclado.nextLine();
-			if ("S".equalsIgnoreCase(seguro.trim())) {
-				Transaction trans = manejador.session.beginTransaction();
-				manejador.session.delete(peopleEncontrado.get());
-				trans.commit();
-				System.out.println("People borrado...");
-			}
-		}
-		manejador.tearDown();
-	}
-
-	@Override
-	public void update() {
-		manejador.tearUp();
-		Optional<People> peopleEncontrado = getPeopleFromInserts();
-
-		if (peopleEncontrado.isPresent()) {
-			String deseaIngresar = "";
-			Transaction trans = manejador.session.beginTransaction();
-
-			People peopleToUpdate = getPeopleToUpdate(peopleEncontrado.get());
-
-			System.out.println("Desea ingresar el planeta del people S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Planets";
-				List<Planets> planetsInsertados = new ArrayList<Planets>();
-				planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-				Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
-				if (planet != null) {
-					peopleToUpdate.setPlanets(planet);
-				}
-			}
-
-			manejador.session.save(peopleToUpdate);
-			Set<People> peoples = new HashSet<People>();
-			peoples.add(peopleToUpdate);
-
-			System.out.println("Desea ingresar starships que conduce S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Starships";
-				List<Starships> navesInsertadas = new ArrayList<Starships>();
-				navesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
-				if (!listaNaves.isEmpty()) {
-					listaNaves.stream().forEach(nave -> {
-						nave.setPeoples(peoples);
-						manejador.session.save(nave);
-					});
-				}
-			}
-
-			System.out.println("Desea ingresar vehicles que conduce S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Vehicles";
-				List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
-				vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
-				if (!listaVehicles.isEmpty()) {
-					listaVehicles.stream().forEach(vehicle -> {
-						vehicle.setPeoples(peoples);
-						manejador.session.save(vehicle);
-					});
-				}
-			}
-
-			System.out.println("Desea ingresar especies en el people S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Planets";
-				List<Species> speciesInsertadas = new ArrayList<Species>();
-				speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
-				if (!listaSpecies.isEmpty()) {
-					listaSpecies.stream().forEach(specie -> {
-						specie.setPeoples(peoples);
-						manejador.session.save(specie);
-					});
-				}
-			}
-
-			System.out.println("Desea ingresar films donde aparece S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Films";
-				List<Films> filmsInsertadas = new ArrayList<Films>();
-				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
-				if (!listaFilms.isEmpty()) {
-					listaFilms.stream().forEach(film -> {
-						film.setCodigo(film.getCodigo());
-						film.setPeoples(peoples);
-						manejador.session.save(film);
-					});
-				}
-			}
-
-			trans.commit();
-			System.out.println("registro modificado...");
-		}
-		manejador.tearDown();
-	}
-
+	/**
+	 * Método: modificar el objeto del tipo people con los nuevos datos del usuario
+	 * 
+	 * @param people
+	 * @return People
+	 */
 	private People getPeopleToUpdate(People people) {
 		System.out.println("Ingrese el nombre de la people: ");
 		String nombre = teclado.nextLine();
@@ -327,6 +359,11 @@ public class PeopleController implements ICRUDController {
 		return people;
 	}
 
+	/**
+	 * Método: obtener un objeto people de la lista insertada
+	 * 
+	 * @return Optional<People>
+	 */
 	private static Optional<People> getPeopleFromInserts() {
 		Optional<People> peopleEncontrado = Optional.empty();
 
@@ -354,21 +391,28 @@ public class PeopleController implements ICRUDController {
 		return peopleEncontrado;
 	}
 
+	/**
+	 * Método: buscar por nombre, método expuesto
+	 */
 	public void findbyName(String name) {
 		if (name.trim().isEmpty()) {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
 			return;
 		}
-
 		manejador.tearUp();
 		buscarPeopleName(name);
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: buscar por nombre, método no expuesto
+	 * 
+	 * @param name
+	 */
 	private static void buscarPeopleName(String name) {
-		final String sqlQuery = "SELECT * FROM people WHERE UPPER(name) like :name";
-
 		try {
+			final String sqlQuery = "SELECT * FROM people WHERE UPPER(name) like :name";
+
 			List<People> consultaPeople = manejador.session.createNativeQuery(sqlQuery).addEntity(People.class)
 					.setParameter("name", "%" + name.toUpperCase() + "%").list();
 
@@ -383,17 +427,23 @@ public class PeopleController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: mostrar los peoples sin especies, método expuesto
+	 */
 	public void getPeopleWithoutSpecies() {
 		manejador.tearUp();
 		mostrarPeopleSinEspecie();
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: mostrar los peoples sin especies, método no expuesto
+	 */
 	private static void mostrarPeopleSinEspecie() {
-		final String sqlQuery = "SELECT p.* FROM people p LEFT OUTER JOIN species_people pe "
-				+ " ON	(p.codigo = pe.codigo_people) WHERE pe.codigo_people IS NULL ORDER BY p.name ";
-
 		try {
+			final String sqlQuery = "SELECT p.* FROM people p LEFT OUTER JOIN species_people pe "
+					+ " ON	(p.codigo = pe.codigo_people) WHERE pe.codigo_people IS NULL ORDER BY p.name ";
+
 			List<People> consultaPeople = manejador.session.createNativeQuery(sqlQuery).addEntity(People.class).list();
 
 			if (consultaPeople.isEmpty()) {
@@ -407,12 +457,18 @@ public class PeopleController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: mostrar los people en más films partiparon, método expuesto
+	 */
 	public void getPeopleMoreFilmsParticipated() {
 		manejador.tearUp();
 		mostrarPeoplesMasPeliculasParticipado();
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: mostrar los people en más films partiparon, método no expuesto
+	 */
 	private static void mostrarPeoplesMasPeliculasParticipado() {
 		try {
 			final String sqlQuery = "SELECT p.name,  COUNT(codigo_film) AS veces "
@@ -442,12 +498,18 @@ public class PeopleController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: mostrar los cabellos más repetidos, método expuesto
+	 */
 	public void getMoreRepeatedHair() {
 		manejador.tearUp();
 		mostrarCabellosRepetidos();
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: mostrar los cabellos más repetidos, método no expuesto
+	 */
 	private static void mostrarCabellosRepetidos() {
 		final String filterA = "%none%";
 		final String filterB = "%n/a%";
@@ -472,10 +534,18 @@ public class PeopleController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Mostrar todos los registros, método expuesto
+	 */
 	public void showRegisters() {
 		mostrarTodos(getRegisters());
 	}
 
+	/**
+	 * Método: Imprime la lista que le pasamos si tienen si no nos imprime un aviso
+	 * 
+	 * @param consultaPeople
+	 */
 	private static void mostrarTodos(List<People> consultaPeople) {
 		if (consultaPeople.isEmpty()) {
 			System.out.println(KConstants.Common.NOT_REGISTER);
@@ -485,6 +555,11 @@ public class PeopleController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtiene la lista de todos los peoples almacenados, método expuesto
+	 * 
+	 * @return List<People>
+	 */
 	public static List<People> getRegisters() {
 		manejador.tearUp();
 		List<People> consultaPeople = obtenerRegistros();
@@ -493,10 +568,15 @@ public class PeopleController implements ICRUDController {
 		return consultaPeople;
 	}
 
+	/**
+	 * Método: Obtiene la lista de todos los peoples almacenados, método no expuesto
+	 * 
+	 * @return List<People>
+	 */
 	private static List<People> obtenerRegistros() {
-		final String sqlQuery = "FROM People";
 		List<People> consultaPeople = new ArrayList<People>();
 		try {
+			final String sqlQuery = "FROM People";
 			consultaPeople = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -504,6 +584,12 @@ public class PeopleController implements ICRUDController {
 		return consultaPeople;
 	}
 
+	/**
+	 * Método para cargar una lista de peoples a partir de los peoples insertados
+	 * 
+	 * @param peoplesInsertadas
+	 * @return List<People>
+	 */
 	public static List<People> cargarPeoples(List<People> peoplesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);

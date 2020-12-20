@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.Transaction;
 
 import com.tema4.constants.KConstants;
@@ -17,6 +19,14 @@ import com.tema4.models.Starships;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+/**
+ * Controlador de StarshipsController
+ * 
+ * Clase que controla el CRUD completo para la clase Starships
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 @SuppressWarnings("unchecked")
 public class StarshipsController implements ICRUDController {
 	private static StarshipsController startshipsController;
@@ -36,34 +46,97 @@ public class StarshipsController implements ICRUDController {
 		return startshipsController;
 	}
 
-	@Override
+	/**
+	 * Método: Create
+	 * 
+	 * Creación de un registro del tipo Starships con sus relaciones
+	 */
 	public void create() {
-		manejador.tearUp();
-		String deseaIngresar = "";
+		try {
+			manejador.tearUp();
 
-		Transaction trans = manejador.session.beginTransaction();
+			Transaction trans = manejador.session.beginTransaction();
 
-		Starships starshipToInsert = getStarshipToInsert();
-		manejador.session.save(starshipToInsert);
-		Set<Starships> starships = new HashSet<Starships>();
-		starships.add(starshipToInsert);
+			Starships starshipToInsert = getStarshipToInsert();
+			manejador.session.save(starshipToInsert);
+			Set<Starships> starships = new HashSet<Starships>();
+			starships.add(starshipToInsert);
 
-		System.out.println("Desea ingresar people que conduce la starship S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setStarshipses(starships);
-					manejador.session.save(people);
-				});
-			}
+			insertPeopleStarship(starships);
+			insertFilmStarship(starships);
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+			manejador.tearDown();
+		} catch (PersistenceException e) {
+			System.err.println("Fallo en el insert en la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+	}
+	/**
+	 * Método: Delete
+	 * 
+	 * Eliminación de un registro del tipo Starships no elimina sus relaciones
+	 */
+	public void delete() {
+		manejador.tearUp();
+		try {
+			Optional<Starships> starshipEncontrado = getStarshipFromInserts();
 
+			if (starshipEncontrado.isPresent()) {
+				System.out.println(KConstants.Common.ARE_YOU_SURE);
+				String seguro = teclado.nextLine();
+				if ("S".equalsIgnoreCase(seguro.trim())) {
+					Transaction trans = manejador.session.beginTransaction();
+					manejador.session.delete(starshipEncontrado.get());
+					trans.commit();
+					System.out.println("Starship borrado...");
+				}
+			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en el borrado por contener una clave foránea");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+		manejador.tearDown();
+	}
+	
+	/**
+	 * Método: Update
+	 * 
+	 * Modificación de un registro del tipo Starships
+	 */
+	public void update() {
+		manejador.tearUp();
+		try {
+
+			Optional<Starships> starshipEncontrado = getStarshipFromInserts();
+
+			if (starshipEncontrado.isPresent()) {
+				Transaction trans = manejador.session.beginTransaction();
+
+				Starships starshipToUpdate = getStarshipToUpdate(starshipEncontrado.get());
+				manejador.session.save(starshipToUpdate);
+				Set<Starships> starships = new HashSet<Starships>();
+				starships.add(starshipToUpdate);
+
+				insertPeopleStarship(starships);
+				insertFilmStarship(starships);
+
+				trans.commit();
+				System.out.println("registro ingresado...");
+			}
+		} catch (PersistenceException e) {
+			System.err.println("Error en la consulta de actualización a la BD");
+		} catch (Exception e) {
+			System.err.println(KConstants.Common.FAIL_CONECTION);
+		}
+		manejador.tearDown();
+	}
+
+	private void insertFilmStarship(Set<Starships> starships) {
+		String deseaIngresar;
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
@@ -79,10 +152,25 @@ public class StarshipsController implements ICRUDController {
 				});
 			}
 		}
+	}
 
-		trans.commit();
-		System.out.println("registro ingresado...");
-		manejador.tearDown();
+	private void insertPeopleStarship(Set<Starships> starships) {
+		String deseaIngresar;
+		System.out.println("Desea ingresar people que conduce la starship S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			final String sqlQuery = "FROM People";
+			List<People> peoplesInsertadas = new ArrayList<People>();
+			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			if (!listaPeoples.isEmpty()) {
+				listaPeoples.stream().forEach(people -> {
+					people.setCodigo(people.getCodigo());
+					people.setStarshipses(starships);
+					manejador.session.save(people);
+				});
+			}
+		}
 	}
 
 	private Starships getStarshipToInsert() {
@@ -176,24 +264,6 @@ public class StarshipsController implements ICRUDController {
 		return starships;
 	}
 
-	@Override
-	public void delete() {
-		manejador.tearUp();
-		Optional<Starships> starshipEncontrado = getStarshipFromInserts();
-
-		if (starshipEncontrado.isPresent()) {
-			System.out.println(KConstants.Common.ARE_YOU_SURE);
-			String seguro = teclado.nextLine();
-			if ("S".equalsIgnoreCase(seguro.trim())) {
-				Transaction trans = manejador.session.beginTransaction();
-				manejador.session.delete(starshipEncontrado.get());
-				trans.commit();
-				System.out.println("Starship borrado...");
-			}
-		}
-		manejador.tearDown();
-	}
-
 	private Optional<Starships> getStarshipFromInserts() {
 		Optional<Starships> starshipEncontrado = Optional.empty();
 
@@ -218,59 +288,6 @@ public class StarshipsController implements ICRUDController {
 			}
 		} while (!valido);
 		return starshipEncontrado;
-	}
-
-	@Override
-	public void update() {
-		manejador.tearUp();
-		String deseaIngresar = "";
-
-		Optional<Starships> starshipEncontrado = getStarshipFromInserts();
-
-		if (starshipEncontrado.isPresent()) {
-			Transaction trans = manejador.session.beginTransaction();
-
-			Starships starshipToUpdate = getStarshipToUpdate(starshipEncontrado.get());
-			manejador.session.save(starshipToUpdate);
-			Set<Starships> starships = new HashSet<Starships>();
-			starships.add(starshipToUpdate);
-
-			System.out.println("Desea ingresar people que conduce la starship S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM People";
-				List<People> peoplesInsertadas = new ArrayList<People>();
-				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
-				if (!listaPeoples.isEmpty()) {
-					listaPeoples.stream().forEach(people -> {
-						people.setCodigo(people.getCodigo());
-						people.setStarshipses(starships);
-						manejador.session.save(people);
-					});
-				}
-			}
-
-			System.out.println("Desea ingresar films donde aparece S/N: ");
-			deseaIngresar = teclado.nextLine();
-			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-				final String sqlQuery = "FROM Films";
-				List<Films> filmsInsertadas = new ArrayList<Films>();
-				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
-				if (!listaFilms.isEmpty()) {
-					listaFilms.stream().forEach(film -> {
-						film.setCodigo(film.getCodigo());
-						film.setStarshipses(starships);
-						manejador.session.save(film);
-					});
-				}
-			}
-
-			trans.commit();
-			System.out.println("registro ingresado...");
-		}
-		manejador.tearDown();
 	}
 
 	private Starships getStarshipToUpdate(Starships starships) {
@@ -346,8 +363,8 @@ public class StarshipsController implements ICRUDController {
 	}
 
 	private static void buscarStarshipsName(String name) {
-		final String sqlQuery = "FROM Starships where UPPER(name) like '%" + name.toUpperCase() + "%'";
 		try {
+			final String sqlQuery = "FROM Starships where UPPER(name) like '%" + name.toUpperCase() + "%'";
 			List<Starships> consultaStarships = manejador.session.createQuery(sqlQuery).list();
 			if (consultaStarships.isEmpty()) {
 				System.out.println(KConstants.Common.NOT_REGISTER + " para el nombre " + name);
@@ -381,9 +398,9 @@ public class StarshipsController implements ICRUDController {
 	}
 
 	private static List<Starships> obtenerRegistros() {
-		final String sqlQuery = "FROM Starships";
 		List<Starships> consultaStarships = new ArrayList<Starships>();
 		try {
+			final String sqlQuery = "FROM Starships";
 			consultaStarships = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
