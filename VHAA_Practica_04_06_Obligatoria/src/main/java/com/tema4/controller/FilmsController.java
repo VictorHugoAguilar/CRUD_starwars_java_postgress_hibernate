@@ -120,7 +120,7 @@ public class FilmsController implements ICRUDController {
 		boolean valido = false;
 		String titulo = "";
 		do {
-			System.out.println("Ingrese el título de la película: ");
+			System.out.println("Ingrese el título: ");
 			titulo = teclado.nextLine();
 
 			valido = !titulo.trim().isEmpty();
@@ -132,7 +132,7 @@ public class FilmsController implements ICRUDController {
 
 		String episodio = "";
 		do {
-			System.out.println("Ingrese el número de episodio");
+			System.out.println("Ingrese el número de episodio: ");
 			episodio = teclado.nextLine();
 
 			valido = !episodio.trim().isEmpty() && Utiles.isNumeric(episodio);
@@ -168,7 +168,7 @@ public class FilmsController implements ICRUDController {
 
 		String sinopsis = "";
 		do {
-			System.out.println("Ingrese la sinopsis de la pelicula: ");
+			System.out.println("Ingrese la sinopsis: ");
 			sinopsis = teclado.nextLine();
 
 			valido = !sinopsis.trim().isEmpty();
@@ -180,7 +180,7 @@ public class FilmsController implements ICRUDController {
 
 		String fechaSalida = "";
 		do {
-			System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
+			System.out.println("Ingrese la fecha de estreno dd/mm/aaaa: ");
 			fechaSalida = teclado.nextLine();
 
 			valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
@@ -208,32 +208,10 @@ public class FilmsController implements ICRUDController {
 
 	@Override
 	public void delete() {
-		List<Films> listaFilms = getRegisters();
-		listaFilms.stream().forEach(Films::imprimeCodValor);
-
-		Optional<Films> filmEncontrado = null;
-		boolean valido = false;
-		do {
-			System.out.println("Introduce el código de Films ha eliminar");
-			final String codigoABorrar = teclado.nextLine();
-
-			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
-				filmEncontrado = listaFilms.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
-						.findFirst();
-				valido = true;
-			} else {
-				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
-				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
-			}
-		} while (!valido);
 		manejador.tearUp();
-		if (valido && filmEncontrado.isPresent()) {
+		Optional<Films> filmEncontrado = getFilmsFromInserts();
+
+		if (filmEncontrado.isPresent()) {
 			System.out.println(KConstants.Common.ARE_YOU_SURE);
 			String seguro = teclado.nextLine();
 			if ("S".equalsIgnoreCase(seguro.trim())) {
@@ -246,34 +224,38 @@ public class FilmsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
-	@Override
-	public void update() {
-		List<Films> listaFilms = getRegisters();
+	private static Optional<Films> getFilmsFromInserts() {
+		Optional<Films> filmEncontrado = Optional.empty();
+
+		List<Films> listaFilms = obtenerRegistros();
 		listaFilms.stream().forEach(Films::imprimeCodValor);
 
-		Optional<Films> filmEncontrado = null;
 		boolean valido = false;
 		do {
-			System.out.println("Introduce el código de Films ha eliminar");
+			System.out.println("Introduce el código de Films: ");
 			final String codigoABorrar = teclado.nextLine();
 
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				filmEncontrado = listaFilms.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = true;
-			} else {
+				valido = filmEncontrado.isPresent() ? true : false;
+			}
+			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
+				System.out.println(KConstants.Common.INSERT_OTHER);
 				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
+				valido = !"S".equalsIgnoreCase(otro.trim());
 			}
 		} while (!valido);
-		if (valido && filmEncontrado.isPresent()) {
-			manejador.tearUp();
+		return filmEncontrado;
+	}
+
+	@Override
+	public void update() {
+		manejador.tearUp();
+		Optional<Films> filmEncontrado = getFilmsFromInserts();
+
+		if (filmEncontrado.isPresent()) {
 			Films filmModificado = obtenerDatosModificados(filmEncontrado.get());
 
 			String deseaIngresar = "";
@@ -346,49 +328,47 @@ public class FilmsController implements ICRUDController {
 
 			trans.commit();
 			System.out.println("registro modificado...");
-			manejador.tearDown();
 		}
+		manejador.tearDown();
 	}
 
 	private Films obtenerDatosModificados(Films films) {
 		boolean valido = false;
 		System.out.println("Ingrese el título de la película: ");
 		String titulo = teclado.nextLine();
-		String episodio = "";
-		do {
-			System.out.println("Ingrese el número de episodio");
-			episodio = teclado.nextLine();
-
-			valido = Utiles.isNumeric(episodio);
-			if (!valido) {
-				System.out.println(KConstants.Common.NOT_VALID_DATA);
-			}
-
-		} while (!valido);
-
+		System.out.println("Ingrese el número de episodio");
+		String episodio = teclado.nextLine();
+		if (!episodio.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(episodio);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese el número de episodio");
+					episodio = teclado.nextLine();
+				}
+			} while (!valido);
+		}
 		System.out.println("Ingrese el nombre del director/es: ");
 		String director = teclado.nextLine();
-
 		System.out.println("Ingrese el nombre del productor/es: ");
 		String productor = teclado.nextLine();
-
 		System.out.println("Ingrese la sinopsis de la pelicula: ");
 		String sinopsis = teclado.nextLine();
+		System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
+		String fechaSalida = teclado.nextLine();
+		if (!fechaSalida.isEmpty()) {
+			do {
+				valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
+					fechaSalida = teclado.nextLine();
+				} else {
+					fechaSalida = Utiles.parseDate(fechaSalida, KConstants.FormatDate.YYYYMMDDD);
+				}
 
-		String fechaSalida = "";
-		do {
-			System.out.println("Ingrese la fecha de salida dd/mm/aaaa: ");
-			fechaSalida = teclado.nextLine();
-
-			valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
-			if (!valido) {
-				System.out.println(KConstants.Common.NOT_VALID_DATA);
-			} else {
-				fechaSalida = Utiles.parseDate(fechaSalida, KConstants.FormatDate.YYYYMMDDD);
-			}
-
-		} while (!valido);
-
+			} while (!valido);
+		}
 		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
 		if (!titulo.isEmpty())
 			films.setTitle(titulo);

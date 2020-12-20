@@ -15,11 +15,10 @@ import com.tema4.models.Films;
 import com.tema4.models.People;
 import com.tema4.models.Planets;
 import com.tema4.models.Species;
-import com.tema4.models.Starships;
-import com.tema4.models.Vehicles;
 import com.tema4.services.HandlerBD;
 import com.tema4.utils.Utiles;
 
+@SuppressWarnings("unchecked")
 public class PlanetsController implements ICRUDController {
 	private static PlanetsController planetsController;
 	private static HandlerBD manejador;
@@ -49,7 +48,7 @@ public class PlanetsController implements ICRUDController {
 		Set<Planets> planets = new HashSet<Planets>();
 		planets.add(planetToInsert);
 
-		System.out.println("Desea ingresar especies que pertenece al Planet S/N: ");
+		System.out.println("Desea ingresar especies que pertenece al planet S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
 			final String sqlQuery = "FROM Species";
@@ -65,7 +64,7 @@ public class PlanetsController implements ICRUDController {
 			}
 		}
 
-		System.out.println("Desea ingresar people en el films S/N: ");
+		System.out.println("Desea ingresar people en el planet S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
 			final String sqlQuery = "FROM People";
@@ -124,31 +123,28 @@ public class PlanetsController implements ICRUDController {
 		String rotationPeriod = teclado.nextLine();
 		System.out.println("Periodo en orbita: ");
 		String orbitalPeriod = teclado.nextLine();
-		System.out.println("Ingrese la Gravedad: ");
+		System.out.println("Ingrese la gravedad: ");
 		String gravity = teclado.nextLine();
 		System.out.println("Ingrese la población: ");
 		String population = teclado.nextLine();
 		System.out.println("Ingrese el clima: ");
 		String climate = teclado.nextLine();
-		System.out.println("Ingrese los terros ");
+		System.out.println("Ingrese los terrenos: ");
 		String terrain = teclado.nextLine();
 		System.out.println("Ingrese las superficies: ");
 		String surfaceWater = teclado.nextLine();
-		planet.setName(nombre);
 		String fechaCreación = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
 		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
-		planet.setDiameter(diameter.isEmpty() || Utiles.isNumeric(diameter) ? KConstants.Common.UNKNOWN : diameter);
-		planet.setRotationPeriod(
-				rotationPeriod.isEmpty() || Utiles.isNumeric(rotationPeriod) ? KConstants.Common.UNKNOWN
-						: rotationPeriod);
-		planet.setOrbitalPeriod(
-				orbitalPeriod.isEmpty() || Utiles.isNumeric(orbitalPeriod) ? KConstants.Common.UNKNOWN : orbitalPeriod);
-		planet.setGravity(gravity.isEmpty() || Utiles.isNumeric(gravity) ? KConstants.Common.UNKNOWN : gravity);
-		planet.setPopulation(
-				population.isEmpty() || Utiles.isNumeric(population) ? KConstants.Common.UNKNOWN : population);
-		planet.setClimate(climate.isEmpty() ? KConstants.Common.UNKNOWN : climate);
-		planet.setTerrain(terrain.isEmpty() ? KConstants.Common.UNKNOWN : terrain);
-		planet.setSurfaceWater(surfaceWater.isEmpty() ? KConstants.Common.UNKNOWN : surfaceWater);
+
+		planet.setName(nombre);
+		planet.setDiameter(Utiles.controlData(diameter, true, true));
+		planet.setRotationPeriod(Utiles.controlData(rotationPeriod, true, true));
+		planet.setOrbitalPeriod(Utiles.controlData(orbitalPeriod, true, true));
+		planet.setGravity(Utiles.controlData(gravity, true, false));
+		planet.setPopulation(Utiles.controlData(population, true, true));
+		planet.setClimate(Utiles.controlData(climate, true, false));
+		planet.setTerrain(Utiles.controlData(terrain, true, false));
+		planet.setSurfaceWater(Utiles.controlData(surfaceWater, true, false));
 		planet.setCreated(fechaCreación);
 		planet.setEdited(fechaEdicion);
 		return planet;
@@ -156,32 +152,9 @@ public class PlanetsController implements ICRUDController {
 
 	@Override
 	public void delete() {
-		List<Planets> listaPlanets = getRegisters();
-		listaPlanets.stream().forEach(Planets::imprimeCodValor);
-
-		Optional<Planets> planetsEncontrado = null;
-		boolean valido = false;
-		do {
-			System.out.println("Introduce el código de Films ha eliminar");
-			final String codigoABorrar = teclado.nextLine();
-
-			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
-				planetsEncontrado = listaPlanets.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
-						.findFirst();
-				valido = true;
-			} else {
-				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
-				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
-			}
-		} while (!valido);
 		manejador.tearUp();
-		if (valido && planetsEncontrado.isPresent()) {
+		Optional<Planets> planetsEncontrado = getPlanetFromInserts();
+		if (planetsEncontrado.isPresent()) {
 			System.out.println(KConstants.Common.ARE_YOU_SURE);
 			String seguro = teclado.nextLine();
 			if ("S".equalsIgnoreCase(seguro.trim())) {
@@ -194,10 +167,192 @@ public class PlanetsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	private static Optional<Planets> getPlanetFromInserts() {
+		Optional<Planets> planetsEncontrado = Optional.empty();
+
+		List<Planets> listaPlanets = obtenerRegistros();
+		listaPlanets.stream().forEach(Planets::imprimeCodValor);
+
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de planeta: ");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				planetsEncontrado = listaPlanets.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = planetsEncontrado.isPresent() ? true : false;
+			}
+			if (!valido) {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+			}
+		} while (!valido);
+
+		return planetsEncontrado;
+	}
+
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		manejador.tearUp();
+		Optional<Planets> planetsEncontrado = getPlanetFromInserts();
 
+		if (planetsEncontrado.isPresent()) {
+
+			Transaction trans = manejador.session.beginTransaction();
+			String deseaIngresar = "";
+
+			Planets planetToUpdate = getPlanetToUpdate(planetsEncontrado.get());
+
+			manejador.session.save(planetToUpdate);
+			Set<Planets> planets = new HashSet<Planets>();
+			planets.add(planetToUpdate);
+
+			System.out.println("Desea ingresar especies que pertenece al planet S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Species";
+				List<Species> speciesInsertadas = new ArrayList<Species>();
+				speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
+				if (!listaSpecies.isEmpty()) {
+					listaSpecies.stream().forEach(specie -> {
+						specie.setCodigo(specie.getCodigo());
+						specie.setPlanets(planetToUpdate);
+						manejador.session.save(specie);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar people que pertenece al planet S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM People";
+				List<People> peoplesInsertadas = new ArrayList<People>();
+				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+				if (!listaPeoples.isEmpty()) {
+					listaPeoples.stream().forEach(people -> {
+						people.setCodigo(people.getCodigo());
+						people.setPlanets(planetToUpdate);
+						manejador.session.save(people);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar films donde aparece S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Films";
+				List<Films> filmsInsertadas = new ArrayList<Films>();
+				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+				if (!listaFilms.isEmpty()) {
+					listaFilms.stream().forEach(film -> {
+						film.setCodigo(film.getCodigo());
+						film.setPlanetses(planets);
+						manejador.session.save(film);
+					});
+				}
+			}
+
+			trans.commit();
+			System.out.println("registro modificado...");
+		}
+		manejador.tearDown();
+	}
+
+	private Planets getPlanetToUpdate(Planets planets) {
+		boolean valido = false;
+
+		System.out.println("Ingrese el nombre: ");
+		String nombre = teclado.nextLine();
+
+		System.out.println("Ingrese el diámetro: ");
+		String diameter = teclado.nextLine();
+		if (!diameter.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(diameter);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese el diámetro númerico: ");
+					diameter = teclado.nextLine();
+				}
+			} while (!valido);
+		}
+
+		System.out.println("Ingrese el período de rotación: ");
+		String rotationPeriod = teclado.nextLine();
+		if (!rotationPeriod.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(rotationPeriod);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese el periodo de rotación númerico: ");
+					nombre = teclado.nextLine();
+				}
+			} while (!valido);
+		}
+
+		System.out.println("Periodo en orbita: ");
+		String orbitalPeriod = teclado.nextLine();
+		if (!orbitalPeriod.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(orbitalPeriod);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese el periodo en orbital númerico: ");
+					nombre = teclado.nextLine();
+				}
+
+			} while (!valido);
+		}
+		System.out.println("Ingrese la Gravedad: ");
+		String gravity = teclado.nextLine();
+		System.out.println("Ingrese la población: ");
+		String population = teclado.nextLine();
+		if (!population.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(population);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la población númerico: ");
+					nombre = teclado.nextLine();
+				}
+			} while (!valido);
+		}
+		System.out.println("Ingrese el clima: ");
+		String climate = teclado.nextLine();
+		System.out.println("Ingrese los terrenos ");
+		String terrain = teclado.nextLine();
+		System.out.println("Ingrese las superficies: ");
+		String surfaceWater = teclado.nextLine();
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+
+		if (!nombre.isEmpty())
+			planets.setName(nombre);
+		if (!diameter.isEmpty())
+			planets.setDiameter(diameter);
+		if (!rotationPeriod.isEmpty())
+			planets.setRotationPeriod(rotationPeriod);
+		if (!orbitalPeriod.isEmpty())
+			planets.setOrbitalPeriod(orbitalPeriod);
+		if (!gravity.isEmpty())
+			planets.setGravity(gravity);
+		if (!population.isEmpty())
+			planets.setPopulation(population);
+		if (!climate.isEmpty())
+			planets.setClimate(climate);
+		if (!terrain.isEmpty())
+			planets.setTerrain(terrain);
+		if (!surfaceWater.isEmpty())
+			planets.setSurfaceWater(surfaceWater);
+
+		planets.setEdited(fechaEdicion);
+
+		return planets;
 	}
 
 	public void findbyName(String name) {
@@ -205,7 +360,6 @@ public class PlanetsController implements ICRUDController {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
 			return;
 		}
-		manejador = HandlerBD.getInstance();
 		manejador.tearUp();
 		buscarPlanetName(name);
 		manejador.tearDown();
@@ -239,7 +393,6 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	public static List<Planets> getRegisters() {
-		manejador = HandlerBD.getInstance();
 		manejador.tearUp();
 		List<Planets> consultaPlanets = obtenerRegistros();
 		manejador.tearDown();

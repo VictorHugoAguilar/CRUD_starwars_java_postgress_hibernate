@@ -39,8 +39,8 @@ public class SpeciesController implements ICRUDController {
 
 	@Override
 	public void create() {
-		String deseaIngresar = "";
 		manejador.tearUp();
+		String deseaIngresar = "";
 		Transaction trans = manejador.session.beginTransaction();
 
 		Species specieToInsert = getSpecieToInsert();
@@ -120,8 +120,30 @@ public class SpeciesController implements ICRUDController {
 		} while (!valido);
 		System.out.println("Ingrese la altura promedia: ");
 		String altura = teclado.nextLine();
+		if (!altura.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(altura);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la altura numérica: ");
+					altura = teclado.nextLine();
+				}
+
+			} while (!valido);
+		}
 		System.out.println("Ingrese la esperanza de vida: ");
 		String esperanza = teclado.nextLine();
+		if (!esperanza.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(esperanza);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la esperanza numérica: ");
+					esperanza = teclado.nextLine();
+				}
+
+			} while (!valido);
+		}
 		System.out.println("Ingrese los colores de ojos: ");
 		String colorOjos = teclado.nextLine();
 		System.out.println("Ingrese los colores de pelo: ");
@@ -136,13 +158,12 @@ public class SpeciesController implements ICRUDController {
 		specie.setName(nombre);
 		specie.setClassification(clasificacion);
 		specie.setDesignation(designacion);
-		specie.setAverageHeight(altura.isEmpty() || !Utiles.isNumeric(altura) ? KConstants.Common.UNKNOWN : altura);
-		specie.setAverageLifespan(
-				esperanza.isEmpty() || !Utiles.isNumeric(esperanza) ? KConstants.Common.UNKNOWN : esperanza);
-		specie.setEyeColors(colorOjos.isEmpty() ? KConstants.Common.UNKNOWN : colorOjos);
-		specie.setHairColors(colorPelo.isEmpty() ? KConstants.Common.UNKNOWN : colorPelo);
-		specie.setSkinColors(colorPiel.isEmpty() ? KConstants.Common.UNKNOWN : colorPiel);
-		specie.setLanguage(lenguaje.isEmpty() ? KConstants.Common.UNKNOWN : lenguaje);
+		specie.setAverageHeight(Utiles.controlData(altura, true, true));
+		specie.setAverageLifespan(Utiles.controlData(esperanza, true, true));
+		specie.setEyeColors(Utiles.controlData(colorOjos, true, false));
+		specie.setHairColors(Utiles.controlData(colorPelo, true, false));
+		specie.setSkinColors(Utiles.controlData(colorPiel, true, false));
+		specie.setLanguage(Utiles.controlData(lenguaje, true, false));
 		specie.setCreated(fechaCreación);
 		specie.setEdited(fechaEdicion);
 
@@ -151,32 +172,10 @@ public class SpeciesController implements ICRUDController {
 
 	@Override
 	public void delete() {
-		List<Species> listaSpecies = getRegisters();
-		listaSpecies.stream().forEach(Species::imprimeCodValor);
-
-		Optional<Species> speciesEncontrado = null;
-		boolean valido = false;
-		do {
-			System.out.println("Introduce el código de Films ha eliminar");
-			final String codigoABorrar = teclado.nextLine();
-
-			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
-				speciesEncontrado = listaSpecies.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
-						.findFirst();
-				valido = true;
-			} else {
-				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
-				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
-			}
-		} while (!valido);
 		manejador.tearUp();
-		if (valido && speciesEncontrado.isPresent()) {
+		Optional<Species> speciesEncontrado = getSpecieFromInsert();
+
+		if (speciesEncontrado.isPresent()) {
 			System.out.println(KConstants.Common.ARE_YOU_SURE);
 			String seguro = teclado.nextLine();
 			if ("S".equalsIgnoreCase(seguro.trim())) {
@@ -189,10 +188,146 @@ public class SpeciesController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	private static Optional<Species> getSpecieFromInsert() {
+		Optional<Species> speciesEncontrado = Optional.empty();
+
+		List<Species> listaSpecies = obtenerRegistros();
+		listaSpecies.stream().forEach(Species::imprimeCodValor);
+
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de Films: ");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				speciesEncontrado = listaSpecies.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = speciesEncontrado.isPresent() ? true : false;
+			}
+			if (!valido) {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+			}
+		} while (!valido);
+		return speciesEncontrado;
+	}
+
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		manejador.tearUp();
+		Optional<Species> speciesEncontrado = getSpecieFromInsert();
 
+		if (speciesEncontrado.isPresent()) {
+			String deseaIngresar = "";
+			Transaction trans = manejador.session.beginTransaction();
+
+			Species specieToUpdate = getSpecieToUpdate(speciesEncontrado.get());
+
+			System.out.println("Desea ingresar el planeta de la especie S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Planets";
+				List<Planets> planetsInsertados = new ArrayList<Planets>();
+				planetsInsertados = manejador.session.createQuery(sqlQuery).list();
+				Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
+				if (planet != null) {
+					specieToUpdate.setPlanets(planet);
+				}
+			}
+
+			manejador.session.save(specieToUpdate);
+			Set<Species> species = new HashSet<Species>();
+			species.add(specieToUpdate);
+
+			System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM People";
+				List<People> peoplesInsertadas = new ArrayList<People>();
+				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+				if (!listaPeoples.isEmpty()) {
+					listaPeoples.stream().forEach(people -> {
+						people.setCodigo(people.getCodigo());
+						people.setSpecieses(species);
+						manejador.session.save(people);
+					});
+				}
+			}
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+		}
+		manejador.tearDown();
+	}
+
+	private Species getSpecieToUpdate(Species species) {
+		boolean valido = false;
+		System.out.println("Ingrese el nombre: ");
+		String nombre = teclado.nextLine();
+		System.out.println("Ingrese la clasificación: ");
+		String clasificacion = teclado.nextLine();
+		System.out.println("Ingrese la designación: ");
+		String designacion = teclado.nextLine();
+		System.out.println("Ingrese la altura promedia: ");
+		String altura = teclado.nextLine();
+		if (!altura.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(altura);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la altura numérica: ");
+					altura = teclado.nextLine();
+				}
+
+			} while (!valido);
+		}
+		System.out.println("Ingrese la esperanza de vida: ");
+		String esperanza = teclado.nextLine();
+		if (!esperanza.isEmpty()) {
+			do {
+				valido = Utiles.isNumeric(esperanza);
+				if (!valido) {
+					System.out.println(KConstants.Common.NOT_VALID_DATA);
+					System.out.println("Ingrese la esperanza numérica: ");
+					esperanza = teclado.nextLine();
+				}
+
+			} while (!valido);
+		}
+		System.out.println("Ingrese los colores de ojos: ");
+		String colorOjos = teclado.nextLine();
+		System.out.println("Ingrese los colores de pelo: ");
+		String colorPelo = teclado.nextLine();
+		System.out.println("Ingrese los colores de piel: ");
+		String colorPiel = teclado.nextLine();
+		System.out.println("Ingrese el lenguaje: ");
+		String lenguaje = teclado.nextLine();
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+
+		if (!nombre.isEmpty())
+			species.setName(nombre);
+		if (!clasificacion.isEmpty())
+			species.setClassification(clasificacion);
+		if (!designacion.isEmpty())
+			species.setDesignation(designacion);
+		if (!altura.isEmpty())
+			species.setAverageHeight(altura);
+		if (!esperanza.isEmpty())
+			species.setAverageLifespan(esperanza);
+		if (!colorOjos.isEmpty())
+			species.setEyeColors(colorOjos);
+		if (!colorPelo.isEmpty())
+			species.setHairColors(colorPelo);
+		if (!colorPiel.isEmpty())
+			species.setSkinColors(colorPiel);
+		if (!lenguaje.isEmpty())
+			species.setLanguage(lenguaje);
+		species.setEdited(fechaEdicion);
+
+		return species;
 	}
 
 	public void findbyName(String name) {

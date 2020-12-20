@@ -38,8 +38,9 @@ public class StarshipsController implements ICRUDController {
 
 	@Override
 	public void create() {
-		String deseaIngresar = "";
 		manejador.tearUp();
+		String deseaIngresar = "";
+
 		Transaction trans = manejador.session.beginTransaction();
 
 		Starships starshipToInsert = getStarshipToInsert();
@@ -143,11 +144,11 @@ public class StarshipsController implements ICRUDController {
 		String tripulacion = teclado.nextLine();
 		System.out.println("Ingrese el número de pasajeros: ");
 		String pasajeros = teclado.nextLine();
-		System.out.println("Ingrese la velocidad maxima: ");
+		System.out.println("Ingrese la velocidad máxima: ");
 		String velocidadMax = teclado.nextLine();
 		System.out.println("Ingrese el hyperDriver: ");
 		String hyperdriver = teclado.nextLine();
-		System.out.println("Ingrese el mlgt: ");
+		System.out.println("Ingrese el MLGT: ");
 		String mglts = teclado.nextLine();
 		System.out.println("Ingrese la capacidad: ");
 		String capacidad = teclado.nextLine();
@@ -160,21 +161,15 @@ public class StarshipsController implements ICRUDController {
 		starships.setModel(modelo);
 		starships.setStarshipClass(clase);
 		starships.setManufacturer(fabricado);
-		starships.setCostInCredits(coste.isEmpty() || !Utiles.isNumeric(coste) ? KConstants.Common.UNKNOWN : coste);
-		starships.setLength(largo.isEmpty() || !Utiles.isNumeric(largo) ? KConstants.Common.UNKNOWN : largo);
-		starships.setCrew(
-				tripulacion.isEmpty() || !Utiles.isNumeric(tripulacion) ? KConstants.Common.UNKNOWN : tripulacion);
-		starships.setPassengers(
-				pasajeros.isEmpty() || !Utiles.isNumeric(pasajeros) ? KConstants.Common.UNKNOWN : pasajeros);
-		starships.setMaxAtmospheringSpeed(
-				velocidadMax.isEmpty() || !Utiles.isNumeric(velocidadMax) ? KConstants.Common.UNKNOWN : velocidadMax);
-		starships.setHyperdriveRating(
-				hyperdriver.isEmpty() || !Utiles.isNumeric(hyperdriver) ? KConstants.Common.UNKNOWN : hyperdriver);
-		starships.setMglt(mglts.isEmpty() || !Utiles.isNumeric(mglts) ? KConstants.Common.UNKNOWN : mglts);
-		starships.setCargoCapacity(
-				capacidad.isEmpty() || !Utiles.isNumeric(capacidad) ? KConstants.Common.UNKNOWN : capacidad);
-		starships.setConsumables(
-				consumibles.isEmpty() || !Utiles.isNumeric(consumibles) ? KConstants.Common.UNKNOWN : consumibles);
+		starships.setCostInCredits(Utiles.controlData(coste, true, true));
+		starships.setLength(Utiles.controlData(largo, true, true));
+		starships.setCrew(Utiles.controlData(tripulacion, true, true));
+		starships.setPassengers(Utiles.controlData(pasajeros, true, true));
+		starships.setMaxAtmospheringSpeed(Utiles.controlData(velocidadMax, true, true));
+		starships.setHyperdriveRating(Utiles.controlData(hyperdriver, true, true));
+		starships.setMglt(Utiles.controlData(mglts, true, true));
+		starships.setCargoCapacity(Utiles.controlData(capacidad, true, true));
+		starships.setConsumables(Utiles.controlData(consumibles, true, false));
 		starships.setCreated(fechaCreación);
 		starships.setEdited(fechaEdicion);
 
@@ -183,32 +178,10 @@ public class StarshipsController implements ICRUDController {
 
 	@Override
 	public void delete() {
-		List<Starships> listaStarship = getRegisters();
-		listaStarship.stream().forEach(Starships::imprimeCodValor);
-
-		Optional<Starships> starshipEncontrado = null;
-		boolean valido = false;
-		do {
-			System.out.println("Introduce el código de Starship ha eliminar");
-			final String codigoABorrar = teclado.nextLine();
-
-			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
-				starshipEncontrado = listaStarship.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
-						.findFirst();
-				valido = true;
-			} else {
-				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
-				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
-			}
-		} while (!valido);
 		manejador.tearUp();
-		if (valido && starshipEncontrado.isPresent()) {
+		Optional<Starships> starshipEncontrado = getStarshipFromInserts();
+
+		if (starshipEncontrado.isPresent()) {
 			System.out.println(KConstants.Common.ARE_YOU_SURE);
 			String seguro = teclado.nextLine();
 			if ("S".equalsIgnoreCase(seguro.trim())) {
@@ -221,10 +194,145 @@ public class StarshipsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	private Optional<Starships> getStarshipFromInserts() {
+		Optional<Starships> starshipEncontrado = Optional.empty();
+
+		List<Starships> listaStarship = obtenerRegistros();
+		listaStarship.stream().forEach(Starships::imprimeCodValor);
+
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de Starship: ");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				starshipEncontrado = listaStarship.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = starshipEncontrado.isPresent() ? true : false;
+			}
+			if (!valido) {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+			}
+		} while (!valido);
+		return starshipEncontrado;
+	}
+
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		manejador.tearUp();
+		String deseaIngresar = "";
 
+		Optional<Starships> starshipEncontrado = getStarshipFromInserts();
+
+		if (starshipEncontrado.isPresent()) {
+			Transaction trans = manejador.session.beginTransaction();
+
+			Starships starshipToUpdate = getStarshipToUpdate(starshipEncontrado.get());
+			manejador.session.save(starshipToUpdate);
+			Set<Starships> starships = new HashSet<Starships>();
+			starships.add(starshipToUpdate);
+
+			System.out.println("Desea ingresar people que conduce la starship S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM People";
+				List<People> peoplesInsertadas = new ArrayList<People>();
+				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+				if (!listaPeoples.isEmpty()) {
+					listaPeoples.stream().forEach(people -> {
+						people.setCodigo(people.getCodigo());
+						people.setStarshipses(starships);
+						manejador.session.save(people);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar films donde aparece S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Films";
+				List<Films> filmsInsertadas = new ArrayList<Films>();
+				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+				if (!listaFilms.isEmpty()) {
+					listaFilms.stream().forEach(film -> {
+						film.setCodigo(film.getCodigo());
+						film.setStarshipses(starships);
+						manejador.session.save(film);
+					});
+				}
+			}
+
+			trans.commit();
+			System.out.println("registro ingresado...");
+		}
+		manejador.tearDown();
+	}
+
+	private Starships getStarshipToUpdate(Starships starships) {
+		System.out.println("Ingrese el nombre: ");
+		String nombre = teclado.nextLine();
+		System.out.println("Ingrese el modelo: ");
+		String modelo = teclado.nextLine();
+		System.out.println("Ingrese la clase: ");
+		String clase = teclado.nextLine();
+		System.out.println("Ingrese la empresa de fabricación: ");
+		String fabricado = teclado.nextLine();
+
+		System.out.println("Ingrese el coste: ");
+		String coste = teclado.nextLine();
+		System.out.println("Ingrese el largo: ");
+		String largo = teclado.nextLine();
+		System.out.println("Ingrese el número de tripulacion: ");
+		String tripulacion = teclado.nextLine();
+		System.out.println("Ingrese el número de pasajeros: ");
+		String pasajeros = teclado.nextLine();
+		System.out.println("Ingrese la velocidad máxima: ");
+		String velocidadMax = teclado.nextLine();
+		System.out.println("Ingrese el hyperDriver: ");
+		String hyperdriver = teclado.nextLine();
+		System.out.println("Ingrese el MLGT: ");
+		String mglts = teclado.nextLine();
+		System.out.println("Ingrese la capacidad: ");
+		String capacidad = teclado.nextLine();
+		System.out.println("Ingrese las duracion de los consumibles: ");
+		String consumibles = teclado.nextLine();
+
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+
+		if (!nombre.isEmpty())
+			starships.setName(nombre);
+		if (!modelo.isEmpty())
+			starships.setModel(modelo);
+		if (!clase.isEmpty())
+			starships.setStarshipClass(clase);
+		if (!fabricado.isEmpty())
+			starships.setManufacturer(fabricado);
+		if (!coste.isEmpty())
+			starships.setCostInCredits(Utiles.controlData(coste, true, true));
+		if (!largo.isEmpty())
+			starships.setLength(Utiles.controlData(largo, true, true));
+		if (!tripulacion.isEmpty())
+			starships.setCrew(Utiles.controlData(tripulacion, true, true));
+		if (!pasajeros.isEmpty())
+			starships.setPassengers(Utiles.controlData(pasajeros, true, true));
+		if (!velocidadMax.isEmpty())
+			starships.setMaxAtmospheringSpeed(Utiles.controlData(velocidadMax, true, true));
+		if (!hyperdriver.isEmpty())
+			starships.setHyperdriveRating(Utiles.controlData(hyperdriver, true, true));
+		if (!mglts.isEmpty())
+			starships.setMglt(Utiles.controlData(mglts, true, true));
+		if (!capacidad.isEmpty())
+			starships.setCargoCapacity(Utiles.controlData(capacidad, true, true));
+		if (!consumibles.isEmpty())
+			starships.setConsumables(Utiles.controlData(consumibles, true, false));
+		starships.setEdited(fechaEdicion);
+
+		return starships;
 	}
 
 	public void findbyName(String name) {

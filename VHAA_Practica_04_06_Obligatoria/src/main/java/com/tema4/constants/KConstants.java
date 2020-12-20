@@ -16,12 +16,13 @@ public class KConstants {
 		public static final String NOT_VALID_DATA = "No ha introducido ningún dato o el formato es incorrecto";
 		public static final String CODE_NOT_FOUND = "El código introducido no esta registrado en la BD";
 		public static final String ARE_YOU_SURE = "Esta seguro de eliminar el registro S/N: "; 
+		public static final String INSERT_OTHER = "Desea introducir otro S/N: ";
 
 	}
 
 	public class FormatDate {
 
-		public static final String YYYYMMDDD = "yyyy/MM/dd";
+		public static final String YYYYMMDDD = "yyyy-MM-dd";
 		public static final String DDMMYYYY = "dd/MM/yyyy";
 		public static final String FORMAT_BD = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 		public static final String FORMAT_SYS = "EEE MMM dd HH:mm:ss zzz yyyy";

@@ -262,7 +262,7 @@ public class People implements java.io.Serializable {
 		String nacimiento = Utiles.checkUnknown(getBirthYear());
 		sb.append(String.format("%-20s", nacimiento));
 		String mundo = "desconocido";
-		if (getPlanets().getName() != null) {
+		if (getPlanets() != null && getPlanets().getName() != null) {
 			mundo = getPlanets().getName();
 		}
 		sb.append(String.format("%-20s", mundo));
@@ -303,7 +303,7 @@ public class People implements java.io.Serializable {
 
 		String films = "";
 		if (getFilmses().isEmpty()) {
-			species = "No ha participado en films";
+			films = "No ha participado en films";
 		} else {
 			for (Films film : getFilmses()) {
 				films += film.getTitle() + "   ";
@@ -338,8 +338,10 @@ public class People implements java.io.Serializable {
 		sb.append("\n");
 		String nacimiento = getBirthYear();
 		sb.append(String.format("%-40s", "Año Nacimiento: " + nacimiento));
-		String mundo = getPlanets().getName();
-		sb.append(String.format("%-40s", "Mundo: " + mundo));
+		if (getPlanets() != null) {
+			String mundo = getPlanets().getName();
+			sb.append(String.format("%-40s", "Mundo: " + mundo));
+		}
 
 		String species = "";
 		if (getSpecieses().isEmpty()) {

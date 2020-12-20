@@ -27,9 +27,6 @@ import com.tema4.utils.Utiles;
 @Table(name = "films")
 public class Films implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private int codigo;
 	private String title;
@@ -281,6 +278,8 @@ public class Films implements java.io.Serializable {
 		sb.append(String.format("%-30s", directors));
 		String productors = getProducer();
 		sb.append(String.format("%-50s", productors));
+		String fechaSalida = getReleaseDate();
+		sb.append(String.format("%-30s", fechaSalida));
 		String sinopsis = Utiles.formatedTextSize(getOpeningCrawl(), 60);
 		sb.append(String.format("%-65s", sinopsis));
 		String creado = getCreated();

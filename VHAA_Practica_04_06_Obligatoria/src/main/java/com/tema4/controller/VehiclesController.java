@@ -38,8 +38,8 @@ public class VehiclesController implements ICRUDController {
 
 	@Override
 	public void create() {
-		String deseaIngresar = "";
 		manejador.tearUp();
+		String deseaIngresar = "";
 		Transaction trans = manejador.session.beginTransaction();
 
 		Vehicles vehicleToInsert = getVehicleToInsert();
@@ -156,18 +156,13 @@ public class VehiclesController implements ICRUDController {
 		vehicle.setModel(modelo);
 		vehicle.setVehicleClass(clase);
 		vehicle.setManufacturer(fabricado);
-		vehicle.setCostInCredits(coste.isEmpty() || !Utiles.isNumeric(coste) ? KConstants.Common.UNKNOWN : coste);
-		vehicle.setLength(largo.isEmpty() || !Utiles.isNumeric(largo) ? KConstants.Common.UNKNOWN : largo);
-		vehicle.setCrew(
-				tripulacion.isEmpty() || !Utiles.isNumeric(tripulacion) ? KConstants.Common.UNKNOWN : tripulacion);
-		vehicle.setPassengers(
-				pasajeros.isEmpty() || !Utiles.isNumeric(pasajeros) ? KConstants.Common.UNKNOWN : pasajeros);
-		vehicle.setMaxAtmospheringSpeed(
-				velocidadMax.isEmpty() || !Utiles.isNumeric(velocidadMax) ? KConstants.Common.UNKNOWN : velocidadMax);
-		vehicle.setCargoCapacity(
-				capacidad.isEmpty() || !Utiles.isNumeric(capacidad) ? KConstants.Common.UNKNOWN : capacidad);
-		vehicle.setConsumables(
-				consumibles.isEmpty() || !Utiles.isNumeric(consumibles) ? KConstants.Common.UNKNOWN : consumibles);
+		vehicle.setCostInCredits(Utiles.controlData(coste, true, true));
+		vehicle.setLength(Utiles.controlData(largo, true, true));
+		vehicle.setCrew(Utiles.controlData(tripulacion, true, true));
+		vehicle.setPassengers(Utiles.controlData(pasajeros, true, true));
+		vehicle.setMaxAtmospheringSpeed(Utiles.controlData(velocidadMax, true, true));
+		vehicle.setCargoCapacity(Utiles.controlData(capacidad, true, true));
+		vehicle.setConsumables(Utiles.controlData(consumibles, true, false));
 		vehicle.setCreated(fechaCreación);
 		vehicle.setEdited(fechaEdicion);
 
@@ -176,32 +171,10 @@ public class VehiclesController implements ICRUDController {
 
 	@Override
 	public void delete() {
-		List<Vehicles> listaVehicles = getRegisters();
-		listaVehicles.stream().forEach(Vehicles::imprimeCodValor);
-
-		Optional<Vehicles> vehicleEncontrado = null;
-		boolean valido = false;
-		do {
-			System.out.println("Introduce el código de Vehicles ha eliminar");
-			final String codigoABorrar = teclado.nextLine();
-
-			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
-				vehicleEncontrado = listaVehicles.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
-						.findFirst();
-				valido = true;
-			} else {
-				System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				System.out.println("Desea introducir otro S/N: ");
-				String otro = teclado.nextLine();
-				if ("S".equalsIgnoreCase(otro.trim())) {
-					valido = false;
-				} else {
-					valido = true;
-				}
-			}
-		} while (!valido);
 		manejador.tearUp();
-		if (valido && vehicleEncontrado.isPresent()) {
+		Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
+
+		if (vehicleEncontrado.isPresent()) {
 			System.out.println(KConstants.Common.ARE_YOU_SURE);
 			String seguro = teclado.nextLine();
 			if ("S".equalsIgnoreCase(seguro.trim())) {
@@ -214,10 +187,135 @@ public class VehiclesController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	private static Optional<Vehicles> getVehicleFromInsert() {
+		Optional<Vehicles> vehicleEncontrado = Optional.empty();
+
+		List<Vehicles> listaVehicles = obtenerRegistros();
+		listaVehicles.stream().forEach(Vehicles::imprimeCodValor);
+
+		boolean valido = false;
+		do {
+			System.out.println("Introduce el código de Vehicles: ");
+			final String codigoABorrar = teclado.nextLine();
+
+			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
+				vehicleEncontrado = listaVehicles.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
+						.findFirst();
+				valido = vehicleEncontrado.isPresent() ? true : false;
+			}
+			if (!valido) {
+				System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+			}
+		} while (!valido);
+		return vehicleEncontrado;
+	}
+
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		manejador.tearUp();
+		Optional<Vehicles> vehicleEncontrado = getVehicleFromInsert();
 
+		if (vehicleEncontrado.isPresent()) {
+			String deseaIngresar = "";
+			Transaction trans = manejador.session.beginTransaction();
+
+			Vehicles vehicleToUpdate = getVehicleToUpdate(vehicleEncontrado.get());
+			manejador.session.save(vehicleToUpdate);
+			Set<Vehicles> vehicle = new HashSet<Vehicles>();
+			vehicle.add(vehicleToUpdate);
+
+			System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM People";
+				List<People> peoplesInsertadas = new ArrayList<People>();
+				peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+				if (!listaPeoples.isEmpty()) {
+					listaPeoples.stream().forEach(people -> {
+						people.setCodigo(people.getCodigo());
+						people.setVehicleses(vehicle);
+						manejador.session.save(people);
+					});
+				}
+			}
+
+			System.out.println("Desea ingresar films donde aparece S/N: ");
+			deseaIngresar = teclado.nextLine();
+			if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+				final String sqlQuery = "FROM Films";
+				List<Films> filmsInsertadas = new ArrayList<Films>();
+				filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
+				List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+				if (!listaFilms.isEmpty()) {
+					listaFilms.stream().forEach(film -> {
+						film.setCodigo(film.getCodigo());
+						film.setVehicleses(vehicle);
+						manejador.session.save(film);
+					});
+				}
+			}
+
+			trans.commit();
+			System.out.println("registro modificado...");
+
+		}
+		manejador.tearDown();
+	}
+
+	private Vehicles getVehicleToUpdate(Vehicles vehicle) {
+		System.out.println("Ingrese el nombre: ");
+		String nombre = teclado.nextLine();
+		System.out.println("Ingrese el modelo: ");
+		String modelo = teclado.nextLine();
+		System.out.println("Ingrese la clase: ");
+		String clase = teclado.nextLine();
+		System.out.println("Ingrese la empresa de fabricación: ");
+		String fabricado = teclado.nextLine();
+		System.out.println("Ingrese el coste: ");
+		String coste = teclado.nextLine();
+		System.out.println("Ingrese el largo: ");
+		String largo = teclado.nextLine();
+		System.out.println("Ingrese el número de tripulación: ");
+		String tripulacion = teclado.nextLine();
+		System.out.println("Ingrese el número de pasajeros: ");
+		String pasajeros = teclado.nextLine();
+		System.out.println("Ingrese la velocidad máxima: ");
+		String velocidadMax = teclado.nextLine();
+		System.out.println("Ingrese la capacidad: ");
+		String capacidad = teclado.nextLine();
+		System.out.println("Ingrese las duración de los consumibles: ");
+		String consumibles = teclado.nextLine();
+		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
+
+		if (!nombre.isEmpty())
+			vehicle.setName(nombre);
+		if (!modelo.isEmpty())
+			vehicle.setModel(modelo);
+		if (!clase.isEmpty())
+			vehicle.setVehicleClass(clase);
+		if (!fabricado.isEmpty())
+			vehicle.setManufacturer(fabricado);
+		if (!coste.isEmpty())
+			vehicle.setCostInCredits(Utiles.controlData(coste, true, true));
+		if (!largo.isEmpty())
+			vehicle.setLength(Utiles.controlData(largo, true, true));
+		if (!tripulacion.isEmpty())
+			vehicle.setCrew(Utiles.controlData(tripulacion, true, true));
+		if (!pasajeros.isEmpty())
+			vehicle.setPassengers(Utiles.controlData(pasajeros, true, true));
+		if (!velocidadMax.isEmpty())
+			vehicle.setMaxAtmospheringSpeed(Utiles.controlData(velocidadMax, true, true));
+		if (!capacidad.isEmpty())
+			vehicle.setCargoCapacity(Utiles.controlData(capacidad, true, true));
+		if (!consumibles.isEmpty())
+			vehicle.setConsumables(Utiles.controlData(consumibles, true, false));
+		vehicle.setEdited(fechaEdicion);
+
+		return vehicle;
 	}
 
 	public void findbyName(String name) {
