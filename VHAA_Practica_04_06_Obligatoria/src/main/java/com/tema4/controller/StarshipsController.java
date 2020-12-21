@@ -74,6 +74,7 @@ public class StarshipsController implements ICRUDController {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
 	}
+
 	/**
 	 * Método: Delete
 	 * 
@@ -90,18 +91,18 @@ public class StarshipsController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(starshipEncontrado.get());
-					trans.commit();
+					//trans.commit();
 					System.out.println("Starship borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
 		manejador.tearDown();
 	}
-	
+
 	/**
 	 * Método: Update
 	 * 
@@ -135,6 +136,11 @@ public class StarshipsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Insert Starships in Films
+	 * 
+	 * @param starships
+	 */
 	private void insertFilmStarship(Set<Starships> starships) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar films donde aparece S/N: ");
@@ -154,6 +160,11 @@ public class StarshipsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Insert Starships in People
+	 * 
+	 * @param starships
+	 */
 	private void insertPeopleStarship(Set<Starships> starships) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar people que conduce la starship S/N: ");
@@ -173,6 +184,12 @@ public class StarshipsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Crea un objeto del tipo Starships con los datos introducidos por el
+	 * usuario
+	 * 
+	 * @return Starships
+	 */
 	private Starships getStarshipToInsert() {
 		Starships starships = new Starships();
 		boolean valido = false;
@@ -264,6 +281,11 @@ public class StarshipsController implements ICRUDController {
 		return starships;
 	}
 
+	/**
+	 * Método: Obtiene un objeto del tipo Starships de los insertados
+	 * 
+	 * @return Optional<Starships>
+	 */
 	private Optional<Starships> getStarshipFromInserts() {
 		Optional<Starships> starshipEncontrado = Optional.empty();
 
@@ -278,7 +300,7 @@ public class StarshipsController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				starshipEncontrado = listaStarship.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = starshipEncontrado.isPresent() ? true : false;
+				valido = starshipEncontrado.isPresent();
 			}
 			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
@@ -290,6 +312,13 @@ public class StarshipsController implements ICRUDController {
 		return starshipEncontrado;
 	}
 
+	/**
+	 * Método: Modifica un objeto del tipo Starships con los datos del usuario a
+	 * partir del objeto recuperado
+	 * 
+	 * @param Starships
+	 * @return Starships
+	 */
 	private Starships getStarshipToUpdate(Starships starships) {
 		System.out.println("Ingrese el nombre: ");
 		String nombre = teclado.nextLine();
@@ -352,6 +381,10 @@ public class StarshipsController implements ICRUDController {
 		return starships;
 	}
 
+	/**
+	 * Método: Obtiene una lista de Straships a partir del nombre pasado, método
+	 * expuesto
+	 */
 	public void findbyName(String name) {
 		if (name.trim().isEmpty()) {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
@@ -362,6 +395,10 @@ public class StarshipsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Obtiene una lista de Straships a partir del nombre pasado, método no
+	 * expuesto
+	 */
 	private static void buscarStarshipsName(String name) {
 		try {
 			final String sqlQuery = "FROM Starships where UPPER(name) like '%" + name.toUpperCase() + "%'";
@@ -376,10 +413,20 @@ public class StarshipsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Imprime una lista de Straships, método expuesto
+	 * 
+	 * @return List<Starships>
+	 */
 	public void showRegisters() {
 		mostrarTodos(getRegisters());
 	}
 
+	/**
+	 * Método: Imprime una lista de Straships, método no expuesto
+	 * 
+	 * @return List<Starships>
+	 */
 	private static void mostrarTodos(List<Starships> consultaStarships) {
 		if (consultaStarships.isEmpty()) {
 			System.out.println(KConstants.Common.NOT_REGISTER);
@@ -389,6 +436,11 @@ public class StarshipsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtiene una lista de Straships, método expuesto
+	 * 
+	 * @return List<Starships>
+	 */
 	public static List<Starships> getRegisters() {
 		manejador.tearUp();
 		List<Starships> consultaStarships = obtenerRegistros();
@@ -397,6 +449,11 @@ public class StarshipsController implements ICRUDController {
 		return consultaStarships;
 	}
 
+	/**
+	 * Método: Obtiene una lista de Straships, método no expuesto
+	 * 
+	 * @return List<Starships>
+	 */
 	private static List<Starships> obtenerRegistros() {
 		List<Starships> consultaStarships = new ArrayList<Starships>();
 		try {
@@ -408,17 +465,25 @@ public class StarshipsController implements ICRUDController {
 		return consultaStarships;
 	}
 
+	/**
+	 * Método: Carga una lista Starships a partir de la lista de Starships
+	 * insertadas
+	 * 
+	 * @param StarshipsInsertadas
+	 * @return List<Starships>
+	 */
 	public static List<Starships> cargarStarships(List<Starships> navesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
+		List<Starships> listaNaves = new ArrayList<Starships>();
+		Optional<Starships> naveEncontrada = Optional.empty();
+		boolean valido = false;
+
 		navesInsertadas.stream().forEach(Starships::imprimeCodValor);
 
-		boolean valido = false;
-		List<Starships> listaNaves = new ArrayList<Starships>();
-		Optional<Starships> naveEncontrada;
 		do {
-			System.out.println("Ingrese el código de nave: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -426,20 +491,20 @@ public class StarshipsController implements ICRUDController {
 				naveEncontrada = navesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!naveEncontrada.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
-					listaNaves.add(naveEncontrada.get());
+				valido = naveEncontrada.isPresent();
 
-					System.out.println("Desea ingresar otra nave S/N");
-					String otraNave = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otraNave.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				if (valido) {
+					listaNaves.add(naveEncontrada.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listaNaves;

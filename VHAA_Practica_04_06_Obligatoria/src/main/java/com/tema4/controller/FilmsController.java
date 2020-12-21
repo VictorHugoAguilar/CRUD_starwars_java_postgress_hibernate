@@ -67,7 +67,7 @@ public class FilmsController implements ICRUDController {
 			insertStarshipFilms(films);
 			insertVehicleFilms(films);
 			insertPlanetFilms(films);
-			insertPepleFilms(films);
+			insertPeopleFilms(films);
 
 			trans.commit();
 			System.out.println("registro ingresado...");
@@ -78,7 +78,7 @@ public class FilmsController implements ICRUDController {
 		}
 		manejador.tearDown();
 	}
-	
+
 	/**
 	 * Método: Delete
 	 * 
@@ -95,12 +95,12 @@ public class FilmsController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(filmEncontrado.get());
-					trans.commit();
+					//trans.commit();
 					System.out.println("Films borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
@@ -129,7 +129,7 @@ public class FilmsController implements ICRUDController {
 				insertStarshipFilms(films);
 				insertVehicleFilms(films);
 				insertPlanetFilms(films);
-				insertPepleFilms(films);
+				insertPeopleFilms(films);
 
 				trans.commit();
 				System.out.println("registro modificado...");
@@ -142,7 +142,12 @@ public class FilmsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
-	private void insertPepleFilms(Set<Films> films) {
+	/**
+	 * Método:Insert films in peoples
+	 * 
+	 * @param films
+	 */
+	private void insertPeopleFilms(Set<Films> films) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar people en el films S/N: ");
 		deseaIngresar = teclado.nextLine();
@@ -161,6 +166,11 @@ public class FilmsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Insert films in planets
+	 * 
+	 * @param films
+	 */
 	private void insertPlanetFilms(Set<Films> films) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar planets en el films S/N: ");
@@ -179,6 +189,11 @@ public class FilmsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Insert films in starships
+	 * 
+	 * @param films
+	 */
 	private void insertStarshipFilms(Set<Films> films) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar starships en el films S/N: ");
@@ -197,6 +212,11 @@ public class FilmsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Insert films in vehicles
+	 * 
+	 * @param films
+	 */
 	private void insertVehicleFilms(Set<Films> films) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar vehicles en el films S/N: ");
@@ -215,6 +235,11 @@ public class FilmsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Crear un objeto del tipo Films con los datos que introduce el usuario
+	 * 
+	 * @return Films
+	 */
 	private Films getFilmToInsert() {
 		Films films = new Films();
 		boolean valido = false;
@@ -306,6 +331,11 @@ public class FilmsController implements ICRUDController {
 		return films;
 	}
 
+	/**
+	 * Método: Obtiene un objeto con el código que introduce el usuario
+	 * 
+	 * @return Optional<Films>
+	 */
 	private static Optional<Films> getFilmsFromInserts() {
 		Optional<Films> filmEncontrado = Optional.empty();
 
@@ -320,7 +350,7 @@ public class FilmsController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				filmEncontrado = listaFilms.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = filmEncontrado.isPresent() ? true : false;
+				valido = filmEncontrado.isPresent();
 			}
 			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
@@ -332,6 +362,12 @@ public class FilmsController implements ICRUDController {
 		return filmEncontrado;
 	}
 
+	/**
+	 * Método: Modifica el objeto del tipo Films con los datos pasado por el usuario
+	 * 
+	 * @param films
+	 * @return Films
+	 */
 	private Films obtenerDatosModificados(Films films) {
 		boolean valido = false;
 		System.out.println("Ingrese el título de la película: ");
@@ -386,6 +422,9 @@ public class FilmsController implements ICRUDController {
 		return films;
 	}
 
+	/**
+	 * Método: busqueda por nombre, método expuesto
+	 */
 	public void findbyName(String title) {
 		if (title.trim().isEmpty()) {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
@@ -394,6 +433,9 @@ public class FilmsController implements ICRUDController {
 		buscarStarshipsName(title);
 	}
 
+	/**
+	 * Método: busqueda por nombre, método no expuesto
+	 */
 	private static void buscarStarshipsName(String title) {
 		manejador.tearUp();
 		try {
@@ -410,10 +452,18 @@ public class FilmsController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: mostar todos los registros, método expuesto
+	 */
 	public void showRegisters() {
 		mostrarTodos(getRegisters());
 	}
 
+	/**
+	 * Método: imprime los registros que le pasamos por parámetro
+	 * 
+	 * @param consultaFilms
+	 */
 	private static void mostrarTodos(List<Films> consultaFilms) {
 		if (consultaFilms.isEmpty()) {
 			System.out.println(KConstants.Common.NOT_REGISTER);
@@ -423,6 +473,11 @@ public class FilmsController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtiene una lista con todo los registros, método expuesto
+	 * 
+	 * @return List<Films>
+	 */
 	public static List<Films> getRegisters() {
 		manejador.tearUp();
 		List<Films> consultaFilms = obtenerRegistros();
@@ -430,6 +485,11 @@ public class FilmsController implements ICRUDController {
 		return consultaFilms;
 	}
 
+	/**
+	 * Método: Obtiene una lista con todo los registros, método no expuesto
+	 * 
+	 * @return List<Films>
+	 */
 	private static List<Films> obtenerRegistros() {
 		List<Films> consultaFilms = new ArrayList<Films>();
 		try {
@@ -441,18 +501,24 @@ public class FilmsController implements ICRUDController {
 		return consultaFilms;
 	}
 
+	/**
+	 * Método: Carga en una lista las personas del films.
+	 * 
+	 * @param filmsInsertadas
+	 * @return List<Films>
+	 */
 	public static List<Films> cargarPeoples(List<Films> filmsInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
+		Optional<Films> filmsEncontrada= Optional.empty();
 		List<Films> listaFilms = new ArrayList<Films>();
 		boolean valido = false;
 
 		filmsInsertadas.stream().forEach(Films::imprimeCodValor);
 
-		Optional<Films> filmsEncontrada;
 		do {
-			System.out.println("Ingrese el código del Films: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -460,20 +526,20 @@ public class FilmsController implements ICRUDController {
 				filmsEncontrada = filmsInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!filmsEncontrada.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
-					listaFilms.add(filmsEncontrada.get());
+				valido = filmsEncontrada.isPresent();
 
-					System.out.println("Desea ingresar otra films S/N: ");
-					String otraNave = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otraNave.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				if (valido) {
+					listaFilms.add(filmsEncontrada.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otrofilm = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otrofilm.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listaFilms;

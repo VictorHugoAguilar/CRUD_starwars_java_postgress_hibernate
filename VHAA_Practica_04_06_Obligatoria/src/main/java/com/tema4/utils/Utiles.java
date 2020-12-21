@@ -7,11 +7,13 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.tema4.constants.KConstants;
-import com.tema4.models.Films;
-import com.tema4.models.Species;
-import com.tema4.models.Starships;
-import com.tema4.models.Vehicles;
 
+/**
+ * Clase: Útiles
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 public class Utiles {
 
 	Utiles() {
@@ -230,20 +232,19 @@ public class Utiles {
 	}
 
 	public static String controlData(String cadena, boolean vacio, boolean numerico) {
-		if(cadena == null) {
+		if (cadena == null) {
 			return KConstants.Common.UNKNOWN;
 		}
-		
-		if(vacio && cadena.trim().isEmpty()) {
-			return  KConstants.Common.UNKNOWN;
-		}
-		
-		if(numerico && !isNumeric(cadena)) {
+
+		if (vacio && cadena.trim().isEmpty()) {
 			return KConstants.Common.UNKNOWN;
 		}
-		
+
+		if (numerico && !isNumeric(cadena)) {
+			return KConstants.Common.UNKNOWN;
+		}
+
 		return cadena;
 	}
-	
 
 }

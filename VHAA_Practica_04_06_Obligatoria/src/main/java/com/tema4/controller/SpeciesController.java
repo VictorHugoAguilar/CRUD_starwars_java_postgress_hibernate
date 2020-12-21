@@ -83,8 +83,8 @@ public class SpeciesController implements ICRUDController {
 	 * Eliminación de un registro del tipo Species no elimina sus relaciones
 	 */
 	public void delete() {
+		manejador.tearUp();
 		try {
-			manejador.tearUp();
 			Optional<Species> speciesEncontrado = getSpecieFromInsert();
 
 			if (speciesEncontrado.isPresent()) {
@@ -93,16 +93,16 @@ public class SpeciesController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(speciesEncontrado.get());
-					trans.commit();
+					//trans.commit();
 					System.out.println("Films borrado...");
 				}
 			}
-			manejador.tearDown();
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
+		manejador.tearDown();
 	}
 
 	/**
@@ -139,6 +139,11 @@ public class SpeciesController implements ICRUDController {
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Insert species in peoples
+	 * 
+	 * @param species
+	 */
 	private void insertSpeciePeople(Set<Species> species) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
@@ -158,6 +163,11 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Insert planets in species
+	 * 
+	 * @param specieToInsert
+	 */
 	private void insertSpeciePlanet(Species specieToInsert) {
 		String deseaIngresar;
 		System.out.println("Desea ingresar el planeta de la especie S/N: ");
@@ -173,6 +183,12 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Crea un objeto del tipo Species con los datos introducidos por el
+	 * usuario
+	 * 
+	 * @return Species
+	 */
 	private Species getSpecieToInsert() {
 		Species specie = new Species();
 		boolean valido = false;
@@ -261,6 +277,11 @@ public class SpeciesController implements ICRUDController {
 		return specie;
 	}
 
+	/**
+	 * Método: Obtiene un objeto del tipo species de los insertados
+	 * 
+	 * @return Optional<Species>
+	 */
 	private static Optional<Species> getSpecieFromInsert() {
 		Optional<Species> speciesEncontrado = Optional.empty();
 
@@ -275,7 +296,7 @@ public class SpeciesController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				speciesEncontrado = listaSpecies.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = speciesEncontrado.isPresent() ? true : false;
+				valido = speciesEncontrado.isPresent();
 			}
 			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
@@ -287,6 +308,13 @@ public class SpeciesController implements ICRUDController {
 		return speciesEncontrado;
 	}
 
+	/**
+	 * Método: Modifica un objeto del tipo species con los datos del usuario a
+	 * partir del objeto recuperado
+	 * 
+	 * @param species
+	 * @return Species
+	 */
 	private Species getSpecieToUpdate(Species species) {
 		boolean valido = false;
 		System.out.println("Ingrese el nombre: ");
@@ -354,6 +382,9 @@ public class SpeciesController implements ICRUDController {
 		return species;
 	}
 
+	/**
+	 * Método: Busca un registro, método expuesto
+	 */
 	public void findbyName(String name) {
 		if (name.trim().isEmpty()) {
 			System.out.println(KConstants.Common.NOT_DATA_FIND);
@@ -370,6 +401,11 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Busca un registro, método no expuesto
+	 * 
+	 * @param name
+	 */
 	private static void buscarSpecieName(String name) {
 		final String sqlQuery = "FROM Species where UPPER(name) like '%" + name.toUpperCase() + "%'";
 		try {
@@ -384,12 +420,18 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtiene las species si people, método expuesto
+	 */
 	public void getSpeciesWithoutPeople() {
 		manejador.tearUp();
 		mostrarEspeciesSinPersonajes();
 		manejador.tearDown();
 	}
 
+	/**
+	 * Método: Obtiene las species si people, método no expuesto
+	 */
 	private static void mostrarEspeciesSinPersonajes() {
 		try {
 			final String sqlQuery = "FROM Species";
@@ -408,10 +450,16 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Imprime los registro del tipo species, método expuesto
+	 */
 	public void showRegisters() {
 		mostrarTodos(getRegisters());
 	}
 
+	/**
+	 * Método: Imprime los registro del tipo species, método no expuesto
+	 */
 	private static void mostrarTodos(List<Species> consultaSpecies) {
 		if (consultaSpecies.isEmpty()) {
 			System.out.println(KConstants.Common.NOT_REGISTER);
@@ -421,6 +469,9 @@ public class SpeciesController implements ICRUDController {
 		}
 	}
 
+	/**
+	 * Método: Obtiene una lista de, método expuesto
+	 */
 	public static List<Species> getRegisters() {
 		manejador.tearUp();
 		List<Species> consultaSpecies = obtenerRegistros();
@@ -428,6 +479,9 @@ public class SpeciesController implements ICRUDController {
 		return consultaSpecies;
 	}
 
+	/**
+	 * Método: Obtiene una lista de, método no expuesto
+	 */
 	private static List<Species> obtenerRegistros() {
 		List<Species> consultaSpecies = new ArrayList<Species>();
 		try {
@@ -439,18 +493,24 @@ public class SpeciesController implements ICRUDController {
 		return consultaSpecies;
 	}
 
+	/**
+	 * Método: Carga una lista especies a partir de la lista de especies insertadas
+	 * 
+	 * @param speciesInsertadas
+	 * @return List<Species>
+	 */
 	public static List<Species> cargarEspecies(List<Species> speciesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
 		List<Species> listaSpecies = new ArrayList<Species>();
+		Optional<Species> especieEncontrada = Optional.empty();
 		boolean valido = false;
 
 		speciesInsertadas.stream().forEach(Species::imprimeCodValor);
 
-		Optional<Species> especieEncontrada;
 		do {
-			System.out.println("Ingrese el código de Specie: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -458,37 +518,43 @@ public class SpeciesController implements ICRUDController {
 				especieEncontrada = speciesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!especieEncontrada.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
-					listaSpecies.add(especieEncontrada.get());
+				valido = especieEncontrada.isPresent();
 
-					System.out.println("Desea ingresar otra Specie S/N");
-					String otraNave = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otraNave.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				if (valido) {
+					listaSpecies.add(especieEncontrada.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otraNave = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otraNave.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listaSpecies;
 	}
 
+	/**
+	 * Método: Carga una especies a partir de la lista de especies insertadas
+	 * 
+	 * @param speciesInsertadas
+	 * @return Species
+	 */
 	public static Species cargarEspecie(List<Species> speciesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
+		Optional<Species> planetEncontrado = Optional.empty();
 		Species species = new Species();
+		boolean valido = false;
 
 		speciesInsertadas.stream().forEach(Species::imprimeCodValor);
 
-		boolean valido = false;
-		Optional<Species> planetEncontrado;
 		do {
-			System.out.println("Ingrese el código del Planets: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -496,13 +562,16 @@ public class SpeciesController implements ICRUDController {
 				planetEncontrado = speciesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!planetEncontrado.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
+				valido = planetEncontrado.isPresent();
+
+				if (valido) {
 					species = planetEncontrado.get();
-					valido = true;
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return species;

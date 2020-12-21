@@ -151,7 +151,7 @@ public class Films implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Starships.class )
 	@JoinTable(name = "starships_films", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) })
@@ -163,7 +163,7 @@ public class Films implements java.io.Serializable {
 		this.starshipses = starshipses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Planets.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Planets.class )
 	@JoinTable(name = "films_planets", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) })
@@ -175,7 +175,7 @@ public class Films implements java.io.Serializable {
 		this.planetses = planetses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class )
 	@JoinTable(name = "films_people", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })
@@ -187,7 +187,7 @@ public class Films implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Vehicles.class )
 	@JoinTable(name = "vehicles_films", joinColumns = {
 			@JoinColumn(name = "codigo_film", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_vehicle", nullable = false, updatable = false) })

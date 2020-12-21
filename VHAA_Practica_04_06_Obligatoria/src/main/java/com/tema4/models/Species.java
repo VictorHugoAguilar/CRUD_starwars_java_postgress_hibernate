@@ -189,7 +189,7 @@ public class Species implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class )
 	@JoinTable(name = "species_people", joinColumns = {
 			@JoinColumn(name = "codigo_specie", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })

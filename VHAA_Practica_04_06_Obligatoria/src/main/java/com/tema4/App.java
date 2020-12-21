@@ -9,9 +9,14 @@ import com.tema4.views.ViewSpecies;
 import com.tema4.views.ViewStarships;
 import com.tema4.views.ViewVehicles;
 
+/**
+ * Clase: Principal del programa
+ * 
+ * @author Victor Hugo Aguilar Aguilar
+ *
+ */
 public class App {
-
-	public static Scanner teclado;
+	private static Scanner teclado;
 
 	public static void main(String[] args) {
 		boolean terminado = false;

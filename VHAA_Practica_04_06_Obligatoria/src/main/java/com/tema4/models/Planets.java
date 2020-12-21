@@ -202,7 +202,7 @@ public class Planets implements java.io.Serializable {
 		this.peoples = peoples;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class )
 	@JoinTable(name = "films_planets", joinColumns = {
 			@JoinColumn(name = "codigo_planet", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })

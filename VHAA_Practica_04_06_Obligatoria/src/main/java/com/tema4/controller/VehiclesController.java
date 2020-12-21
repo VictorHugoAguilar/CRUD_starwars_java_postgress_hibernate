@@ -91,12 +91,12 @@ public class VehiclesController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(vehicleEncontrado.get());
-					trans.commit();
+					//trans.commit();
 					System.out.println("Vehicle borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
@@ -122,7 +122,6 @@ public class VehiclesController implements ICRUDController {
 				vehicle.add(vehicleToUpdate);
 
 				insertPeopleVehicle(vehicle);
-
 				insertFilmVehicle(vehicle);
 
 				trans.commit();
@@ -295,7 +294,7 @@ public class VehiclesController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				vehicleEncontrado = listaVehicles.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = vehicleEncontrado.isPresent() ? true : false;
+				valido = vehicleEncontrado.isPresent();
 			}
 			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
@@ -460,13 +459,13 @@ public class VehiclesController implements ICRUDController {
 			teclado = new Scanner(System.in);
 		}
 		List<Vehicles> listVehicles = new ArrayList<Vehicles>();
+		Optional<Vehicles> vehicleEncontrado = Optional.empty();
 		boolean valido = false;
 
 		vehiclesInsertados.stream().forEach(Vehicles::imprimeCodValor);
-		Optional<Vehicles> vehicleEncontrado;
 
 		do {
-			System.out.println("Ingrese el código de nave: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -474,20 +473,20 @@ public class VehiclesController implements ICRUDController {
 				vehicleEncontrado = vehiclesInsertados.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!vehicleEncontrado.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
+				valido = vehicleEncontrado.isPresent();
+				
+				if (valido) {
 					listVehicles.add(vehicleEncontrado.get());
-
-					System.out.println("Desea ingresar otro Vehicle S/N");
-					String otroVehicle = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otroVehicle.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otroVehicle = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otroVehicle.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listVehicles;

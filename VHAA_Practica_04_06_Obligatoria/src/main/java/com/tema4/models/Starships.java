@@ -227,7 +227,7 @@ public class Starships implements java.io.Serializable {
 		this.edited = edited;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = Films.class )
 	@JoinTable(name = "starships_films", joinColumns = {
 			@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_film", nullable = false, updatable = false) })
@@ -239,7 +239,7 @@ public class Starships implements java.io.Serializable {
 		this.filmses = filmses;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class, cascade = CascadeType.DETACH)
+	@ManyToMany(fetch = FetchType.LAZY, targetEntity = People.class )
 	@JoinTable(name = "starships_people", joinColumns = {
 			@JoinColumn(name = "codigo_starship", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "codigo_people", nullable = false, updatable = false) })

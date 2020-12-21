@@ -92,13 +92,12 @@ public class PlanetsController implements ICRUDController {
 
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(planetsEncontrado.get());
-					trans.commit();
+					// trans.commit();
 					System.out.println("Films borrado...");
-
 				}
 			}
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
@@ -383,7 +382,7 @@ public class PlanetsController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				planetsEncontrado = listaPlanets.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = planetsEncontrado.isPresent() ? true : false;
+				valido = planetsEncontrado.isPresent();
 			}
 			if (!valido) {
 				System.out.println(KConstants.Common.CODE_NOT_FOUND);
@@ -489,13 +488,13 @@ public class PlanetsController implements ICRUDController {
 			teclado = new Scanner(System.in);
 		}
 		List<Planets> listPlanets = new ArrayList<Planets>();
+		Optional<Planets> planetEncontrado = Optional.empty();
+		boolean valido = false;
 
 		planetsInsertados.stream().forEach(Planets::imprimeCodValor);
 
-		boolean valido = false;
-		Optional<Planets> planetEncontrado;
 		do {
-			System.out.println("Ingrese el código del Planets: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -503,23 +502,23 @@ public class PlanetsController implements ICRUDController {
 				planetEncontrado = planetsInsertados.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!planetEncontrado.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
-					listPlanets.add(planetEncontrado.get());
+				valido = planetEncontrado.isPresent();
 
-					System.out.println("Desea ingresar otra planeta S/N");
-					String otroPlaneta = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otroPlaneta.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				if (valido) {
+					listPlanets.add(planetEncontrado.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otroPlaneta = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otroPlaneta.trim());
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listPlanets;
+
 	}
 
 	/**
@@ -532,14 +531,14 @@ public class PlanetsController implements ICRUDController {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
+		Optional<Planets> planetEncontrado = Optional.empty();
 		Planets planets = new Planets();
+		boolean valido = false;
 
 		planetsInsertados.stream().forEach(Planets::imprimeCodValor);
 
-		boolean valido = false;
-		Optional<Planets> planetEncontrado;
 		do {
-			System.out.println("Ingrese el código del Planets: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -547,13 +546,16 @@ public class PlanetsController implements ICRUDController {
 				planetEncontrado = planetsInsertados.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!planetEncontrado.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
+				valido = planetEncontrado.isPresent();
+
+				if (valido) {
 					planets = planetEncontrado.get();
-					valido = true;
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return planets;

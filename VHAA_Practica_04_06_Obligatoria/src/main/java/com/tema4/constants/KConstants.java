@@ -17,6 +17,9 @@ public class KConstants {
 		public static final String CODE_NOT_FOUND = "El código introducido no esta registrado en la BD";
 		public static final String ARE_YOU_SURE = "Esta seguro de eliminar el registro S/N: "; 
 		public static final String INSERT_OTHER = "Desea introducir otro S/N: ";
+		public static final String INVALID_CODE = "El código introducido no es válido";
+		public static final String INSERT_CODE = "Ingrese el código: ";
+		public static final String DELETE_ERROR = "Error en el borrado, existe una relación con otra tabla";
 
 	}
 

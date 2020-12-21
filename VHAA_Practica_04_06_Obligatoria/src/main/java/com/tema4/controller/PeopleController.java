@@ -99,12 +99,12 @@ public class PeopleController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(peopleEncontrado.get());
-					trans.commit();
+					//trans.commit();
 					System.out.println("People borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
-			System.err.println("Error en el borrado por contener una clave foránea");
+			System.err.println(KConstants.Common.DELETE_ERROR);
 		} catch (Exception e) {
 			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
@@ -378,7 +378,7 @@ public class PeopleController implements ICRUDController {
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
 				peopleEncontrado = listaPeoples.stream().filter(f -> f.getCodigo() == Integer.valueOf(codigoABorrar))
 						.findFirst();
-				valido = peopleEncontrado.isPresent() ? true : false;
+				valido = peopleEncontrado.isPresent();
 			}
 
 			if (!valido) {
@@ -442,7 +442,7 @@ public class PeopleController implements ICRUDController {
 	private static void mostrarPeopleSinEspecie() {
 		try {
 			final String sqlQuery = "SELECT p.* FROM people p LEFT OUTER JOIN species_people pe "
-					+ " ON	(p.codigo = pe.codigo_people) WHERE pe.codigo_people IS NULL ORDER BY p.name ";
+					+ " ON	(p.codigo = pe.codigo_people) WHERE pe.codigo_people IS NULL ORDER BY p.codigo ";
 
 			List<People> consultaPeople = manejador.session.createNativeQuery(sqlQuery).addEntity(People.class).list();
 
@@ -450,7 +450,7 @@ public class PeopleController implements ICRUDController {
 				System.out.println(KConstants.Common.NOT_REGISTER);
 			} else {
 				System.out.println("Los personajes que no tienen especies son");
-				consultaPeople.stream().forEach(People::imprimeRegistroCodigoName);
+				consultaPeople.stream().forEach(People::imprimeCodValor);
 			}
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -585,7 +585,7 @@ public class PeopleController implements ICRUDController {
 	}
 
 	/**
-	 * Método para cargar una lista de peoples a partir de los peoples insertados
+	 * Método: Carga una lista de peoples a partir de los peoples insertados
 	 * 
 	 * @param peoplesInsertadas
 	 * @return List<People>
@@ -595,13 +595,13 @@ public class PeopleController implements ICRUDController {
 			teclado = new Scanner(System.in);
 		}
 		List<People> listaPeoples = new ArrayList<People>();
+		Optional<People> peopleEncontrada = Optional.empty();
 		boolean valido = false;
 
 		peoplesInsertadas.stream().forEach(People::imprimeCodValor);
 
-		Optional<People> peopleEncontrada;
 		do {
-			System.out.println("Ingrese el código del People: ");
+			System.out.println(KConstants.Common.INSERT_CODE);
 			final String codigo = teclado.nextLine();
 			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
 
@@ -609,20 +609,20 @@ public class PeopleController implements ICRUDController {
 				peopleEncontrada = peoplesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
 						.findAny();
 
-				if (!peopleEncontrada.isPresent()) {
-					valido = false;
-					System.out.println("El código introducido no es válido");
-				} else {
-					listaPeoples.add(peopleEncontrada.get());
+				valido = peopleEncontrada.isPresent();
 
-					System.out.println("Desea ingresar otra People S/N");
-					String otraNave = teclado.nextLine();
-					if ("S".equalsIgnoreCase(otraNave.trim())) {
-						valido = false;
-					} else {
-						valido = true;
-					}
+				if (valido) {
+					listaPeoples.add(peopleEncontrada.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
 				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otro = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otro.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
 			}
 		} while (!valido);
 		return listaPeoples;
