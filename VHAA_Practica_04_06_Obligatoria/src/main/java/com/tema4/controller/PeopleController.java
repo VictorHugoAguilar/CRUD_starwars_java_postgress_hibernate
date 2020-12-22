@@ -99,7 +99,7 @@ public class PeopleController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(peopleEncontrado.get());
-					//trans.commit();
+					trans.commit();
 					System.out.println("People borrado...");
 				}
 			}
@@ -158,10 +158,8 @@ public class PeopleController implements ICRUDController {
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Films";
-			List<Films> filmsInsertadas = new ArrayList<Films>();
-			filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+			List<Films> listaFilms = new ArrayList<Films>();
+			listaFilms = FilmsController.obtenerRegistros(manejador);
 			if (!listaFilms.isEmpty()) {
 				listaFilms.stream().forEach(film -> {
 					film.setCodigo(film.getCodigo());
@@ -182,10 +180,8 @@ public class PeopleController implements ICRUDController {
 		System.out.println("Desea ingresar especies en el people S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Species";
-			List<Species> speciesInsertadas = new ArrayList<Species>();
-			speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
+			List<Species> listaSpecies = new ArrayList<Species>();
+			listaSpecies = SpeciesController.obtenerRegistros(manejador);
 			if (!listaSpecies.isEmpty()) {
 				listaSpecies.stream().forEach(specie -> {
 					specie.setPeoples(peoples);
@@ -205,10 +201,8 @@ public class PeopleController implements ICRUDController {
 		System.out.println("Desea ingresar vehicles que conduce S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Vehicles";
-			List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
-			vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
+			List<Vehicles> listaVehicles = new ArrayList<Vehicles>();
+			listaVehicles = VehiclesController.obtenerRegistros(manejador);
 			if (!listaVehicles.isEmpty()) {
 				listaVehicles.stream().forEach(vehicle -> {
 					vehicle.setPeoples(peoples);
@@ -228,10 +222,8 @@ public class PeopleController implements ICRUDController {
 		System.out.println("Desea ingresar starships que conduce S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Starships";
-			List<Starships> navesInsertadas = new ArrayList<Starships>();
-			navesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
+			List<Starships> listaNaves = new ArrayList<Starships>();
+			listaNaves = StarshipsController.obtenerRegistros(manejador);
 			if (!listaNaves.isEmpty()) {
 				listaNaves.stream().forEach(nave -> {
 					nave.setPeoples(peoples);
@@ -251,10 +243,7 @@ public class PeopleController implements ICRUDController {
 		System.out.println("Desea ingresar el planeta del people S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Planets> planetsInsertados = new ArrayList<Planets>();
-			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
+			Planets planet = PlanetsController.obtenerRegistro(manejador);
 			if (planet != null) {
 				peopleToInsert.setPlanets(planet);
 			}
@@ -272,7 +261,7 @@ public class PeopleController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre de la people: ");
+			System.out.println("Ingrese el nombre de la people(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -560,7 +549,7 @@ public class PeopleController implements ICRUDController {
 	 * 
 	 * @return List<People>
 	 */
-	public static List<People> getRegisters() {
+	private static List<People> getRegisters() {
 		manejador.tearUp();
 		List<People> consultaPeople = obtenerRegistros();
 		manejador.tearDown();
@@ -576,7 +565,7 @@ public class PeopleController implements ICRUDController {
 	private static List<People> obtenerRegistros() {
 		List<People> consultaPeople = new ArrayList<People>();
 		try {
-			final String sqlQuery = "FROM People";
+			final String sqlQuery = "FROM People ORDER BY codigo";
 			consultaPeople = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -585,12 +574,28 @@ public class PeopleController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtiene la lista de todos los peoples almacenados, método no expuesto
+	 * 
+	 * @return List<People>
+	 */
+	public static List<People> obtenerRegistros(HandlerBD manejador) {
+		List<People> consultaPeople = new ArrayList<People>();
+		try {
+			final String sqlQuery = "FROM People ORDER BY codigo";
+			consultaPeople = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarPeoples(consultaPeople);
+	}
+
+	/**
 	 * Método: Carga una lista de peoples a partir de los peoples insertados
 	 * 
 	 * @param peoplesInsertadas
 	 * @return List<People>
 	 */
-	public static List<People> cargarPeoples(List<People> peoplesInsertadas) {
+	private static List<People> cargarPeoples(List<People> peoplesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}

@@ -91,8 +91,8 @@ public class StarshipsController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(starshipEncontrado.get());
-					//trans.commit();
-					System.out.println("Starship borrado...");
+					trans.commit();
+					System.out.println("Starships borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -146,10 +146,8 @@ public class StarshipsController implements ICRUDController {
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Films";
-			List<Films> filmsInsertadas = new ArrayList<Films>();
-			filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+			List<Films> listaFilms = new ArrayList<Films>();
+			listaFilms = FilmsController.obtenerRegistros(manejador);
 			if (!listaFilms.isEmpty()) {
 				listaFilms.stream().forEach(film -> {
 					film.setCodigo(film.getCodigo());
@@ -170,10 +168,8 @@ public class StarshipsController implements ICRUDController {
 		System.out.println("Desea ingresar people que conduce la starship S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			List<People> listaPeoples = new ArrayList<People>();
+			listaPeoples = PeopleController.obtenerRegistros(manejador);
 			if (!listaPeoples.isEmpty()) {
 				listaPeoples.stream().forEach(people -> {
 					people.setCodigo(people.getCodigo());
@@ -195,7 +191,7 @@ public class StarshipsController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre: ");
+			System.out.println("Ingrese el nombre(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -207,7 +203,7 @@ public class StarshipsController implements ICRUDController {
 
 		String modelo = "";
 		do {
-			System.out.println("Ingrese el modelo: ");
+			System.out.println("Ingrese el modelo(obligatorio): ");
 			modelo = teclado.nextLine();
 
 			valido = !modelo.trim().isEmpty();
@@ -219,7 +215,7 @@ public class StarshipsController implements ICRUDController {
 
 		String clase = "";
 		do {
-			System.out.println("Ingrese la clase: ");
+			System.out.println("Ingrese la clase(obligatorio): ");
 			clase = teclado.nextLine();
 
 			valido = !clase.trim().isEmpty();
@@ -231,7 +227,7 @@ public class StarshipsController implements ICRUDController {
 
 		String fabricado = "";
 		do {
-			System.out.println("Ingrese la empresa de fabricación: ");
+			System.out.println("Ingrese la empresa de fabricación(obligatorio): ");
 			fabricado = teclado.nextLine();
 
 			valido = !fabricado.trim().isEmpty();
@@ -441,7 +437,7 @@ public class StarshipsController implements ICRUDController {
 	 * 
 	 * @return List<Starships>
 	 */
-	public static List<Starships> getRegisters() {
+	private static List<Starships> getRegisters() {
 		manejador.tearUp();
 		List<Starships> consultaStarships = obtenerRegistros();
 		manejador.tearDown();
@@ -457,12 +453,28 @@ public class StarshipsController implements ICRUDController {
 	private static List<Starships> obtenerRegistros() {
 		List<Starships> consultaStarships = new ArrayList<Starships>();
 		try {
-			final String sqlQuery = "FROM Starships";
+			final String sqlQuery = "FROM Starships ORDER BY codigo";
 			consultaStarships = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
 		return consultaStarships;
+	}
+
+	/**
+	 * Método: Obtiene una lista de Straships, método expuesto
+	 * 
+	 * @return List<Starships>
+	 */
+	public static List<Starships> obtenerRegistros(HandlerBD manejador) {
+		List<Starships> consultaStarships = new ArrayList<Starships>();
+		try {
+			final String sqlQuery = "FROM Starships ORDER BY codigo";
+			consultaStarships = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarStarships(consultaStarships);
 	}
 
 	/**
@@ -472,7 +484,7 @@ public class StarshipsController implements ICRUDController {
 	 * @param StarshipsInsertadas
 	 * @return List<Starships>
 	 */
-	public static List<Starships> cargarStarships(List<Starships> navesInsertadas) {
+	private static List<Starships> cargarStarships(List<Starships> navesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}

@@ -91,8 +91,8 @@ public class VehiclesController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(vehicleEncontrado.get());
-					//trans.commit();
-					System.out.println("Vehicle borrado...");
+					trans.commit();
+					System.out.println("Vehicles borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -146,10 +146,8 @@ public class VehiclesController implements ICRUDController {
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Films";
-			List<Films> filmsInsertadas = new ArrayList<Films>();
-			filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+			List<Films> listaFilms = new ArrayList<Films>();
+			listaFilms = FilmsController.obtenerRegistros(manejador);
 			if (!listaFilms.isEmpty()) {
 				listaFilms.stream().forEach(film -> {
 					film.setCodigo(film.getCodigo());
@@ -170,10 +168,8 @@ public class VehiclesController implements ICRUDController {
 		System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			List<People> listaPeoples = new ArrayList<People>();
+			listaPeoples = PeopleController.obtenerRegistros(manejador);
 			if (!listaPeoples.isEmpty()) {
 				listaPeoples.stream().forEach(people -> {
 					people.setCodigo(people.getCodigo());
@@ -195,7 +191,7 @@ public class VehiclesController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre: ");
+			System.out.println("Ingrese el nombre(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -207,7 +203,7 @@ public class VehiclesController implements ICRUDController {
 
 		String modelo = "";
 		do {
-			System.out.println("Ingrese el modelo: ");
+			System.out.println("Ingrese el modelo(obligatorio): ");
 			modelo = teclado.nextLine();
 
 			valido = !modelo.trim().isEmpty();
@@ -219,7 +215,7 @@ public class VehiclesController implements ICRUDController {
 
 		String clase = "";
 		do {
-			System.out.println("Ingrese la clase: ");
+			System.out.println("Ingrese la clase(obligatorio): ");
 			clase = teclado.nextLine();
 
 			valido = !clase.trim().isEmpty();
@@ -231,7 +227,7 @@ public class VehiclesController implements ICRUDController {
 
 		String fabricado = "";
 		do {
-			System.out.println("Ingrese la empresa de fabricación: ");
+			System.out.println("Ingrese la empresa de fabricación(obligatorio): ");
 			fabricado = teclado.nextLine();
 
 			valido = !fabricado.trim().isEmpty();
@@ -422,9 +418,9 @@ public class VehiclesController implements ICRUDController {
 	/**
 	 * Método: Obtener todos los registro, método expuesto
 	 * 
-	 * @return
+	 * @return List<Vehicles>
 	 */
-	public static List<Vehicles> getRegisters() {
+	private static List<Vehicles> getRegisters() {
 		manejador.tearUp();
 		List<Vehicles> consultaVehicles = obtenerRegistros();
 		manejador.tearDown();
@@ -440,7 +436,7 @@ public class VehiclesController implements ICRUDController {
 	private static List<Vehicles> obtenerRegistros() {
 		List<Vehicles> consultaVehicles = new ArrayList<Vehicles>();
 		try {
-			final String sqlQuery = "FROM Vehicles";
+			final String sqlQuery = "FROM Vehicles ORDER BY codigo";
 			consultaVehicles = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -449,12 +445,28 @@ public class VehiclesController implements ICRUDController {
 	}
 
 	/**
+	 * Método: obtener la lista de vehicles completa
+	 * 
+	 * @return List<Vehicles>
+	 */
+	public static List<Vehicles> obtenerRegistros(HandlerBD manejador) {
+		List<Vehicles> consultaVehicles = new ArrayList<Vehicles>();
+		try {
+			final String sqlQuery = "FROM Vehicles ORDER BY codigo";
+			consultaVehicles = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarVehicles(consultaVehicles);
+	}
+
+	/**
 	 * Método: Carga a partir de una lista los seleccionados.
 	 * 
 	 * @param vehiclesInsertados
 	 * @return List<Vehicles>
 	 */
-	public static List<Vehicles> cargarVehicles(List<Vehicles> vehiclesInsertados) {
+	private static List<Vehicles> cargarVehicles(List<Vehicles> vehiclesInsertados) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
@@ -474,7 +486,7 @@ public class VehiclesController implements ICRUDController {
 						.findAny();
 
 				valido = vehicleEncontrado.isPresent();
-				
+
 				if (valido) {
 					listVehicles.add(vehicleEncontrado.get());
 				} else {

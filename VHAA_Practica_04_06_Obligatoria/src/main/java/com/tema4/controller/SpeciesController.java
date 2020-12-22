@@ -93,8 +93,8 @@ public class SpeciesController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(speciesEncontrado.get());
-					//trans.commit();
-					System.out.println("Films borrado...");
+					trans.commit();
+					System.out.println("Species borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -149,10 +149,8 @@ public class SpeciesController implements ICRUDController {
 		System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			List<People> listaPeoples = new ArrayList<People>();
+			listaPeoples = PeopleController.obtenerRegistros(manejador);
 			if (!listaPeoples.isEmpty()) {
 				listaPeoples.stream().forEach(people -> {
 					people.setCodigo(people.getCodigo());
@@ -173,10 +171,7 @@ public class SpeciesController implements ICRUDController {
 		System.out.println("Desea ingresar el planeta de la especie S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Planets> planetsInsertados = new ArrayList<Planets>();
-			planetsInsertados = manejador.session.createQuery(sqlQuery).list();
-			Planets planet = PlanetsController.cargarPlanet(planetsInsertados);
+			Planets planet = PlanetsController.obtenerRegistro(manejador);
 			if (planet != null) {
 				specieToInsert.setPlanets(planet);
 			}
@@ -194,7 +189,7 @@ public class SpeciesController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre: ");
+			System.out.println("Ingrese el nombre(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -205,7 +200,7 @@ public class SpeciesController implements ICRUDController {
 		} while (!valido);
 		String clasificacion = "";
 		do {
-			System.out.println("Ingrese la clasificación: ");
+			System.out.println("Ingrese la clasificación(obligatorio): ");
 			clasificacion = teclado.nextLine();
 
 			valido = !clasificacion.trim().isEmpty();
@@ -216,7 +211,7 @@ public class SpeciesController implements ICRUDController {
 		} while (!valido);
 		String designacion = "";
 		do {
-			System.out.println("Ingrese la designación: ");
+			System.out.println("Ingrese la designación(obligatorio): ");
 			designacion = teclado.nextLine();
 
 			valido = !designacion.trim().isEmpty();
@@ -225,7 +220,7 @@ public class SpeciesController implements ICRUDController {
 			}
 
 		} while (!valido);
-		System.out.println("Ingrese la altura promedia: ");
+		System.out.println("Ingrese la altura promedia(obligatorio): ");
 		String altura = teclado.nextLine();
 		if (!altura.isEmpty()) {
 			do {
@@ -238,14 +233,14 @@ public class SpeciesController implements ICRUDController {
 
 			} while (!valido);
 		}
-		System.out.println("Ingrese la esperanza de vida: ");
+		System.out.println("Ingrese la esperanza de vida(obligatorio): ");
 		String esperanza = teclado.nextLine();
 		if (!esperanza.isEmpty()) {
 			do {
 				valido = Utiles.isNumeric(esperanza);
 				if (!valido) {
 					System.out.println(KConstants.Common.NOT_VALID_DATA);
-					System.out.println("Ingrese la esperanza numérica: ");
+					System.out.println("Ingrese la esperanza de vida numérica: ");
 					esperanza = teclado.nextLine();
 				}
 
@@ -470,9 +465,9 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Obtiene una lista de, método expuesto
+	 * Método: Obtiene una lista de Species, método no expuesto
 	 */
-	public static List<Species> getRegisters() {
+	private static List<Species> getRegisters() {
 		manejador.tearUp();
 		List<Species> consultaSpecies = obtenerRegistros();
 		manejador.tearDown();
@@ -480,12 +475,14 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Obtiene una lista de, método no expuesto
+	 * Método: Obtiene una lista de Species, método no expuesto
+	 * 
+	 * @param manejador
 	 */
 	private static List<Species> obtenerRegistros() {
 		List<Species> consultaSpecies = new ArrayList<Species>();
 		try {
-			final String sqlQuery = "FROM Species";
+			final String sqlQuery = "FROM Species ORDER BY codigo";
 			consultaSpecies = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -494,12 +491,28 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtiene una lista de Species, método expuesto
+	 * 
+	 * @param HandlerBD
+	 */
+	public static List<Species> obtenerRegistros(HandlerBD manejador) {
+		List<Species> consultaSpecies = new ArrayList<Species>();
+		try {
+			final String sqlQuery = "FROM Species ORDER BY codigo";
+			consultaSpecies = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarEspecies(consultaSpecies);
+	}
+
+	/**
 	 * Método: Carga una lista especies a partir de la lista de especies insertadas
 	 * 
 	 * @param speciesInsertadas
 	 * @return List<Species>
 	 */
-	public static List<Species> cargarEspecies(List<Species> speciesInsertadas) {
+	private static List<Species> cargarEspecies(List<Species> speciesInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}

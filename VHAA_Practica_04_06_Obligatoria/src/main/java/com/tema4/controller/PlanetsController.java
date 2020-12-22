@@ -92,8 +92,8 @@ public class PlanetsController implements ICRUDController {
 
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(planetsEncontrado.get());
-					// trans.commit();
-					System.out.println("Films borrado...");
+					trans.commit();
+					System.out.println("Planets borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -148,10 +148,8 @@ public class PlanetsController implements ICRUDController {
 		System.out.println("Desea ingresar films donde aparece S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Films";
-			List<Films> filmsInsertadas = new ArrayList<Films>();
-			filmsInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Films> listaFilms = FilmsController.cargarPeoples(filmsInsertadas);
+			List<Films> listaFilms = new ArrayList<Films>();
+			listaFilms = FilmsController.obtenerRegistros(manejador);
 			if (!listaFilms.isEmpty()) {
 				listaFilms.stream().forEach(film -> {
 					film.setCodigo(film.getCodigo());
@@ -172,10 +170,8 @@ public class PlanetsController implements ICRUDController {
 		System.out.println("Desea ingresar people en el planet S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			List<People> listaPeoples = new ArrayList<People>();
+			listaPeoples = PeopleController.obtenerRegistros(manejador);
 			if (!listaPeoples.isEmpty()) {
 				listaPeoples.stream().forEach(people -> {
 					people.setCodigo(people.getCodigo());
@@ -196,10 +192,8 @@ public class PlanetsController implements ICRUDController {
 		System.out.println("Desea ingresar especies que pertenece al planet S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Species";
-			List<Species> speciesInsertadas = new ArrayList<Species>();
-			speciesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Species> listaSpecies = SpeciesController.cargarEspecies(speciesInsertadas);
+			List<Species> listaSpecies = new ArrayList<Species>();
+			listaSpecies = SpeciesController.obtenerRegistros(manejador);
 			if (!listaSpecies.isEmpty()) {
 				listaSpecies.stream().forEach(specie -> {
 					specie.setCodigo(specie.getCodigo());
@@ -221,7 +215,7 @@ public class PlanetsController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre: ");
+			System.out.println("Ingrese el nombre(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -452,7 +446,7 @@ public class PlanetsController implements ICRUDController {
 	 * 
 	 * @return List<Planets>
 	 */
-	public static List<Planets> getRegisters() {
+	private static List<Planets> getRegisters() {
 		List<Planets> consultaPlanets = new ArrayList<Planets>();
 		manejador.tearUp();
 		consultaPlanets = obtenerRegistros();
@@ -469,7 +463,7 @@ public class PlanetsController implements ICRUDController {
 	private static List<Planets> obtenerRegistros() {
 		List<Planets> consultaPlanets = new ArrayList<Planets>();
 		try {
-			final String sqlQuery = "FROM Planets ";
+			final String sqlQuery = "FROM Planets ORDER BY codigo";
 			consultaPlanets = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -478,12 +472,29 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtener una lista de registro
+	 * 
+	 * @return List<Planets>
+	 */
+	public static List<Planets> obtenerRegistros(HandlerBD manejador) {
+		List<Planets> consultaPlanets = new ArrayList<Planets>();
+		try {
+			final String sqlQuery = "FROM Planets ORDER BY codigo";
+			consultaPlanets = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+
+		return cargarPlanets(consultaPlanets);
+	}
+
+	/**
 	 * Método: Carga de planet de los que hemos insertado
 	 * 
 	 * @param planetsInsertados
 	 * @return List<Planets>
 	 */
-	public static List<Planets> cargarPlanets(List<Planets> planetsInsertados) {
+	private static List<Planets> cargarPlanets(List<Planets> planetsInsertados) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
@@ -522,12 +533,29 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtener una lista de registro
+	 * 
+	 * @return List<Planets>
+	 */
+	public static Planets obtenerRegistro(HandlerBD manejador) {
+		List<Planets> consultaPlanets = new ArrayList<Planets>();
+		try {
+			final String sqlQuery = "FROM Planets ORDER BY codigo";
+			consultaPlanets = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+
+		return cargarPlanet(consultaPlanets);
+	}
+
+	/**
 	 * Método: Carga de Planet a partir de los insertado
 	 * 
 	 * @param planetsInsertados
 	 * @return Planets
 	 */
-	public static Planets cargarPlanet(List<Planets> planetsInsertados) {
+	private static Planets cargarPlanet(List<Planets> planetsInsertados) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
@@ -560,5 +588,4 @@ public class PlanetsController implements ICRUDController {
 		} while (!valido);
 		return planets;
 	}
-
 }

@@ -95,7 +95,7 @@ public class FilmsController implements ICRUDController {
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(filmEncontrado.get());
-					//trans.commit();
+					trans.commit();
 					System.out.println("Films borrado...");
 				}
 			}
@@ -152,10 +152,8 @@ public class FilmsController implements ICRUDController {
 		System.out.println("Desea ingresar people en el films S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM People";
-			List<People> peoplesInsertadas = new ArrayList<People>();
-			peoplesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<People> listaPeoples = PeopleController.cargarPeoples(peoplesInsertadas);
+			List<People> listaPeoples = new ArrayList<People>();
+			listaPeoples = PeopleController.obtenerRegistros(manejador);
 			if (!listaPeoples.isEmpty()) {
 				listaPeoples.stream().forEach(people -> {
 					people.setCodigo(people.getCodigo());
@@ -176,10 +174,7 @@ public class FilmsController implements ICRUDController {
 		System.out.println("Desea ingresar planets en el films S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Planets";
-			List<Planets> planetsInsertadas = new ArrayList<Planets>();
-			planetsInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Planets> listaPlanets = PlanetsController.cargarPlanets(planetsInsertadas);
+			List<Planets> listaPlanets = PlanetsController.obtenerRegistros(manejador);
 			if (!listaPlanets.isEmpty()) {
 				listaPlanets.stream().forEach(planet -> {
 					planet.setFilmses(films);
@@ -199,10 +194,8 @@ public class FilmsController implements ICRUDController {
 		System.out.println("Desea ingresar starships en el films S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Starships";
-			List<Starships> navesInsertadas = new ArrayList<Starships>();
-			navesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Starships> listaNaves = StarshipsController.cargarStarships(navesInsertadas);
+			List<Starships> listaNaves = new ArrayList<Starships>();
+			listaNaves = StarshipsController.obtenerRegistros(manejador);
 			if (!listaNaves.isEmpty()) {
 				listaNaves.stream().forEach(nave -> {
 					nave.setFilmses(films);
@@ -222,10 +215,8 @@ public class FilmsController implements ICRUDController {
 		System.out.println("Desea ingresar vehicles en el films S/N: ");
 		deseaIngresar = teclado.nextLine();
 		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			final String sqlQuery = "FROM Vehicles";
-			List<Vehicles> vehiclesInsertadas = new ArrayList<Vehicles>();
-			vehiclesInsertadas = manejador.session.createQuery(sqlQuery).list();
-			List<Vehicles> listaVehicles = VehiclesController.cargarVehicles(vehiclesInsertadas);
+			List<Vehicles> listaVehicles = new ArrayList<Vehicles>();
+			listaVehicles = VehiclesController.obtenerRegistros(manejador);
 			if (!listaVehicles.isEmpty()) {
 				listaVehicles.stream().forEach(vehicle -> {
 					vehicle.setFilmses(films);
@@ -245,7 +236,7 @@ public class FilmsController implements ICRUDController {
 		boolean valido = false;
 		String titulo = "";
 		do {
-			System.out.println("Ingrese el título: ");
+			System.out.println("Ingrese el título(obligatorio): ");
 			titulo = teclado.nextLine();
 
 			valido = !titulo.trim().isEmpty();
@@ -257,7 +248,7 @@ public class FilmsController implements ICRUDController {
 
 		String episodio = "";
 		do {
-			System.out.println("Ingrese el número de episodio: ");
+			System.out.println("Ingrese el número de episodio(obligatorio): ");
 			episodio = teclado.nextLine();
 
 			valido = !episodio.trim().isEmpty() && Utiles.isNumeric(episodio);
@@ -269,7 +260,7 @@ public class FilmsController implements ICRUDController {
 
 		String director = "";
 		do {
-			System.out.println("Ingrese el nombre del director/es: ");
+			System.out.println("Ingrese el nombre del director/es(obligatorio): ");
 			director = teclado.nextLine();
 
 			valido = !director.trim().isEmpty();
@@ -281,7 +272,7 @@ public class FilmsController implements ICRUDController {
 
 		String productor = "";
 		do {
-			System.out.println("Ingrese el nombre del productor/es: ");
+			System.out.println("Ingrese el nombre del productor/es(obligatorio): ");
 			productor = teclado.nextLine();
 
 			valido = !productor.trim().isEmpty();
@@ -293,7 +284,7 @@ public class FilmsController implements ICRUDController {
 
 		String sinopsis = "";
 		do {
-			System.out.println("Ingrese la sinopsis: ");
+			System.out.println("Ingrese la sinopsis(obligatorio): ");
 			sinopsis = teclado.nextLine();
 
 			valido = !sinopsis.trim().isEmpty();
@@ -305,7 +296,7 @@ public class FilmsController implements ICRUDController {
 
 		String fechaSalida = "";
 		do {
-			System.out.println("Ingrese la fecha de estreno dd/mm/aaaa: ");
+			System.out.println("Ingrese la fecha de estreno dd/mm/aaaa(obligatorio): ");
 			fechaSalida = teclado.nextLine();
 
 			valido = !fechaSalida.trim().isEmpty() && Utiles.isFormatedDateOk(fechaSalida.trim());
@@ -447,7 +438,7 @@ public class FilmsController implements ICRUDController {
 				consultaFilms.stream().forEach(Films::imprimeRegistroDetallado);
 			}
 		} catch (Exception e) {
-			System.out.println(KConstants.Common.FAIL_CONECTION);
+			System.err.println(KConstants.Common.FAIL_CONECTION);
 		}
 		manejador.tearDown();
 	}
@@ -474,11 +465,11 @@ public class FilmsController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Obtiene una lista con todo los registros, método expuesto
+	 * Método: Obtiene una lista con todo los registros, método no expuesto
 	 * 
 	 * @return List<Films>
 	 */
-	public static List<Films> getRegisters() {
+	private static List<Films> getRegisters() {
 		manejador.tearUp();
 		List<Films> consultaFilms = obtenerRegistros();
 		manejador.tearDown();
@@ -493,7 +484,7 @@ public class FilmsController implements ICRUDController {
 	private static List<Films> obtenerRegistros() {
 		List<Films> consultaFilms = new ArrayList<Films>();
 		try {
-			final String sqlQuery = "FROM Films";
+			final String sqlQuery = "FROM Films ORDER BY codigo";
 			consultaFilms = manejador.session.createQuery(sqlQuery).list();
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
@@ -502,16 +493,32 @@ public class FilmsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtiene una lista con todo los registros, método no expuesto
+	 * 
+	 * @return List<Films>
+	 */
+	public static List<Films> obtenerRegistros(HandlerBD manejador) {
+		List<Films> consultaFilms = new ArrayList<Films>();
+		try {
+			final String sqlQuery = "FROM Films ORDER BY codigo";
+			consultaFilms = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarFilms(consultaFilms);
+	}
+
+	/**
 	 * Método: Carga en una lista las personas del films.
 	 * 
 	 * @param filmsInsertadas
 	 * @return List<Films>
 	 */
-	public static List<Films> cargarPeoples(List<Films> filmsInsertadas) {
+	private static List<Films> cargarFilms(List<Films> filmsInsertadas) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
-		Optional<Films> filmsEncontrada= Optional.empty();
+		Optional<Films> filmsEncontrada = Optional.empty();
 		List<Films> listaFilms = new ArrayList<Films>();
 		boolean valido = false;
 
