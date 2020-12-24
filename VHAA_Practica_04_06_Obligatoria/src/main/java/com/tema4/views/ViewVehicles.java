@@ -42,18 +42,18 @@ public class ViewVehicles {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de Vehicles: ");
+		System.out.println("Opciones de Vehículos: ");
 		System.out.println("1- Consultas");
-		System.out.println("2- Insertar vehicle");
-		System.out.println("3- Modificar vehicle");
-		System.out.println("4- Borrar vehicle");
+		System.out.println("2- Insertar vehículo");
+		System.out.println("3- Modificar vehículo");
+		System.out.println("4- Borrar vehículo");
 		System.out.println("0- Volver ");
 	}
 

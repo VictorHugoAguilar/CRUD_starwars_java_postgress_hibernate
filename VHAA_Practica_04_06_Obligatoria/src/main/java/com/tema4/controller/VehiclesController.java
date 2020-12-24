@@ -58,14 +58,11 @@ public class VehiclesController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 
 			Vehicles vehicleToInsert = getVehicleToInsert();
+			vehicleToInsert = getRelations(vehicleToInsert);
+
 			manejador.session.save(vehicleToInsert);
-			Set<Vehicles> vehicle = new HashSet<Vehicles>();
-			vehicle.add(vehicleToInsert);
-
-			insertPeopleVehicle(vehicle);
-			insertFilmVehicle(vehicle);
-
 			trans.commit();
+
 			System.out.println("registro ingresado...");
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
@@ -92,7 +89,7 @@ public class VehiclesController implements ICRUDController {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(vehicleEncontrado.get());
 					trans.commit();
-					System.out.println("Vehicles borrado...");
+					System.out.println("Vehículo borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -117,16 +114,12 @@ public class VehiclesController implements ICRUDController {
 				Transaction trans = manejador.session.beginTransaction();
 
 				Vehicles vehicleToUpdate = getVehicleToUpdate(vehicleEncontrado.get());
-				manejador.session.save(vehicleToUpdate);
-				Set<Vehicles> vehicle = new HashSet<Vehicles>();
-				vehicle.add(vehicleToUpdate);
+				vehicleToUpdate = getRelations(vehicleToUpdate);
 
-				insertPeopleVehicle(vehicle);
-				insertFilmVehicle(vehicle);
-
+				manejador.session.update(vehicleToUpdate);
 				trans.commit();
-				System.out.println("registro modificado...");
 
+				System.out.println("Vehículo modificado...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -137,47 +130,22 @@ public class VehiclesController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Insert film in vehicles
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param vehicle
+	 * @param Planets
+	 * @return Planets con la relaciones
 	 */
-	private void insertFilmVehicle(Set<Vehicles> vehicle) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar films donde aparece S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Films> listaFilms = new ArrayList<Films>();
-			listaFilms = FilmsController.obtenerRegistros(manejador);
-			if (!listaFilms.isEmpty()) {
-				listaFilms.stream().forEach(film -> {
-					film.setCodigo(film.getCodigo());
-					film.setVehicleses(vehicle);
-					manejador.session.save(film);
-				});
-			}
-		}
-	}
+	private Vehicles getRelations(Vehicles vehicle) {
+		Set<People> selectedPeople = PeopleController.getPeoples(manejador);
+		if (!selectedPeople.isEmpty())
+			vehicle.setPeoples(selectedPeople);
 
-	/**
-	 * Método: Insert people in vehicles
-	 * 
-	 * @param vehicle
-	 */
-	private void insertPeopleVehicle(Set<Vehicles> vehicle) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar people que conduce el vehículo S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<People> listaPeoples = new ArrayList<People>();
-			listaPeoples = PeopleController.obtenerRegistros(manejador);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setVehicleses(vehicle);
-					manejador.session.save(people);
-				});
-			}
-		}
+		Set<Films> selectedFilms = FilmsController.getFilms(manejador);
+		if (!selectedFilms.isEmpty())
+			vehicle.setFilmses(selectedFilms);
+
+		return vehicle;
 	}
 
 	/**
@@ -241,15 +209,15 @@ public class VehiclesController implements ICRUDController {
 		String coste = teclado.nextLine();
 		System.out.println("Ingrese el largo: ");
 		String largo = teclado.nextLine();
-		System.out.println("Ingrese el número de tripulacion: ");
+		System.out.println("Ingrese el número de tripulación: ");
 		String tripulacion = teclado.nextLine();
 		System.out.println("Ingrese el número de pasajeros: ");
 		String pasajeros = teclado.nextLine();
-		System.out.println("Ingrese la velocidad maxima: ");
+		System.out.println("Ingrese la velocidad máxima: ");
 		String velocidadMax = teclado.nextLine();
 		System.out.println("Ingrese la capacidad: ");
 		String capacidad = teclado.nextLine();
-		System.out.println("Ingrese las duracion de los consumibles: ");
+		System.out.println("Ingrese las duración de los consumibles: ");
 		String consumibles = teclado.nextLine();
 		String fechaCreación = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
 		String fechaEdicion = Utiles.parseDate(new Date().toString(), KConstants.FormatDate.FORMAT_BD);
@@ -284,7 +252,7 @@ public class VehiclesController implements ICRUDController {
 
 		boolean valido = false;
 		do {
-			System.out.println("Introduce el código de Vehicles: ");
+			System.out.println("Introduce el código de Vehículo: ");
 			final String codigoABorrar = teclado.nextLine();
 
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
@@ -445,11 +413,31 @@ public class VehiclesController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtener una lista de vehiculos para insertar o modificar
+	 * 
+	 * @param HandlerBD
+	 * @return Set<Vehicles>
+	 */
+	public static Set<Vehicles> getVehicles(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		Set<Vehicles> listaVehicles = new HashSet<Vehicles>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar Vehículos que conduce S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaVehicles = obtenerRegistrosSet(manejador);
+		}
+		return listaVehicles;
+	}
+
+	/**
 	 * Método: obtener la lista de vehicles completa
 	 * 
 	 * @return List<Vehicles>
 	 */
-	public static List<Vehicles> obtenerRegistros(HandlerBD manejador) {
+	private static Set<Vehicles> obtenerRegistrosSet(HandlerBD manejador) {
 		List<Vehicles> consultaVehicles = new ArrayList<Vehicles>();
 		try {
 			final String sqlQuery = "FROM Vehicles ORDER BY codigo";
@@ -457,7 +445,7 @@ public class VehiclesController implements ICRUDController {
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
-		return cargarVehicles(consultaVehicles);
+		return cargarVehiclesSet(consultaVehicles);
 	}
 
 	/**
@@ -466,11 +454,8 @@ public class VehiclesController implements ICRUDController {
 	 * @param vehiclesInsertados
 	 * @return List<Vehicles>
 	 */
-	private static List<Vehicles> cargarVehicles(List<Vehicles> vehiclesInsertados) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
-		List<Vehicles> listVehicles = new ArrayList<Vehicles>();
+	private static Set<Vehicles> cargarVehiclesSet(List<Vehicles> vehiclesInsertados) {
+		Set<Vehicles> listVehicles = new HashSet<Vehicles>();
 		Optional<Vehicles> vehicleEncontrado = Optional.empty();
 		boolean valido = false;
 

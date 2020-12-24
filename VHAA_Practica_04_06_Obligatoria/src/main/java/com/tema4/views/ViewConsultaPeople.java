@@ -26,7 +26,7 @@ public class ViewConsultaPeople {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
-				System.out.println("Ingrese el nombre de personaje a buscar");
+				System.out.println("Ingrese el nombre de Personaje a buscar");
 				String name = teclado.nextLine();
 				peopleController.findbyName(name);
 				presioneTeclaParaContinuar();
@@ -52,7 +52,7 @@ public class ViewConsultaPeople {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
@@ -60,9 +60,9 @@ public class ViewConsultaPeople {
 
 	private void showMenu() {
 		System.out.println("Opciones de Consulta de Personajes: ");
-		System.out.println("1- Buscar people por nombre");
-		System.out.println("2- Buscar people sin especie");
-		System.out.println("3- Buscar people en más películas");
+		System.out.println("1- Buscar personaje por nombre");
+		System.out.println("2- Buscar personajes sin especie");
+		System.out.println("3- Buscar personajes en más películas");
 		System.out.println("4- Buscar color de pelo más repetido");
 		System.out.println("5- Mostrar todos");
 		System.out.println("0- Volver ");

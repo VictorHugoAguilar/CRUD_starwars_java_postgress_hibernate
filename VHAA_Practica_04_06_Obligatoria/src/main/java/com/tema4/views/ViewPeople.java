@@ -42,18 +42,18 @@ public class ViewPeople {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de People: ");
+		System.out.println("Opciones de Personajes: ");
 		System.out.println("1- Consultas");
-		System.out.println("2- Insertar people");
-		System.out.println("3- Modificar people");
-		System.out.println("4- Borrar people");
+		System.out.println("2- Insertar personaje");
+		System.out.println("3- Modificar personaje");
+		System.out.println("4- Borrar personaje");
 		System.out.println("0- Volver ");
 	}
 

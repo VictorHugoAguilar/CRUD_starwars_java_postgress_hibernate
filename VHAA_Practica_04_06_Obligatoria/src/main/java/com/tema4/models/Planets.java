@@ -246,7 +246,7 @@ public class Planets implements Serializable {
 		int codigo = getCodigo();
 		sb.append(String.format("%-30s", "Código: " + codigo));
 		String name = getName();
-		sb.append(String.format("%-50s", "Nombre del Planet: " + name) + "\n");
+		sb.append(String.format("%-50s", "Nombre del Planeta: " + name) + "\n");
 		sb.append("\nCarácteristicas del Planets\n");
 		String diametro = Utiles.checkUnknown(getDiameter());
 		sb.append(String.format("%-30s", "Diámetro: " + diametro));
@@ -288,7 +288,7 @@ public class Planets implements Serializable {
 			films += f.getTitle() + "   ";
 		}
 		if (!films.isEmpty()) {
-			sb.append("\nFilms donde aparece: \n");
+			sb.append("\nPelículas donde aparece: \n");
 			sb.append(films + "\n");
 		}
 

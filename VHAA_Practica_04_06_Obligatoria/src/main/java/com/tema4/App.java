@@ -49,7 +49,7 @@ public class App {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
@@ -58,12 +58,12 @@ public class App {
 
 	private static void showMenu() {
 		System.out.println("Escoja una opción: ");
-		System.out.println("1- Gestión de people");
-		System.out.println("2- Gestión de planets");
-		System.out.println("3- Gestión de species");
-		System.out.println("4- Gestión de films");
-		System.out.println("5- Gestión de starships");
-		System.out.println("6- Gestión de vehicles");
+		System.out.println("1- Gestión de Personajes");
+		System.out.println("2- Gestión de Planetas");
+		System.out.println("3- Gestión de Especies");
+		System.out.println("4- Gestión de Peliculas");
+		System.out.println("5- Gestión de Naves");
+		System.out.println("6- Gestión de Vehiculos");
 		System.out.println("0- Salir ");
 	}
 }

@@ -271,7 +271,7 @@ public class Vehicles implements Serializable {
 			filmsAparicion += f.getTitle() + "  ";
 		}
 		if (!filmsAparicion.isEmpty()) {
-			sb.append("\nAparece en films: \n");
+			sb.append("\nAparece en películas: \n");
 			sb.append(filmsAparicion + "\n");
 		}
 		String creado = getCreated();

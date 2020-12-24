@@ -42,18 +42,18 @@ public class ViewPlanets {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de Planet: ");
+		System.out.println("Opciones de Planeta: ");
 		System.out.println("1- Consultas");
-		System.out.println("2- Insertar planet");
-		System.out.println("3- Modificar planet");
-		System.out.println("4- Borrar planet");
+		System.out.println("2- Insertar planeta");
+		System.out.println("3- Modificar planeta");
+		System.out.println("4- Borrar planeta");
 		System.out.println("0- Volver ");
 	}
 

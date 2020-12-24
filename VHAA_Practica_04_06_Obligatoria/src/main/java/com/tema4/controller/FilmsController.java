@@ -60,17 +60,13 @@ public class FilmsController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 
 			Films filmToInsert = getFilmToInsert();
+
+			filmToInsert = getRelations(filmToInsert);
+
 			manejador.session.save(filmToInsert);
-			Set<Films> films = new HashSet<Films>();
-			films.add(filmToInsert);
-
-			insertStarshipFilms(films);
-			insertVehicleFilms(films);
-			insertPlanetFilms(films);
-			insertPeopleFilms(films);
-
 			trans.commit();
-			System.out.println("registro ingresado...");
+
+			System.out.println("Película ingresada...");
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
 		} catch (Exception e) {
@@ -96,7 +92,7 @@ public class FilmsController implements ICRUDController {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(filmEncontrado.get());
 					trans.commit();
-					System.out.println("Films borrado...");
+					System.out.println("Película borrada...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -118,21 +114,16 @@ public class FilmsController implements ICRUDController {
 			Optional<Films> filmEncontrado = getFilmsFromInserts();
 
 			if (filmEncontrado.isPresent()) {
+
 				Films filmModificado = obtenerDatosModificados(filmEncontrado.get());
+				filmModificado = getRelations(filmModificado);
 
 				Transaction trans = manejador.session.beginTransaction();
 
-				manejador.session.save(filmModificado);
-				Set<Films> films = new HashSet<Films>();
-				films.add(filmModificado);
-
-				insertStarshipFilms(films);
-				insertVehicleFilms(films);
-				insertPlanetFilms(films);
-				insertPeopleFilms(films);
-
+				manejador.session.update(filmModificado);
 				trans.commit();
-				System.out.println("registro modificado...");
+
+				System.out.println("Película modificada...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -143,87 +134,30 @@ public class FilmsController implements ICRUDController {
 	}
 
 	/**
-	 * Método:Insert films in peoples
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param films
+	 * @param film
+	 * @return Film con la relaciones
 	 */
-	private void insertPeopleFilms(Set<Films> films) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar people en el films S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<People> listaPeoples = new ArrayList<People>();
-			listaPeoples = PeopleController.obtenerRegistros(manejador);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setFilmses(films);
-					manejador.session.save(people);
-				});
-			}
-		}
-	}
+	private Films getRelations(Films film) {
+		Set<Starships> selectedStarships = StarshipsController.getStarship(manejador);
+		if (!selectedStarships.isEmpty())
+			film.setStarshipses(selectedStarships);
 
-	/**
-	 * Método: Insert films in planets
-	 * 
-	 * @param films
-	 */
-	private void insertPlanetFilms(Set<Films> films) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar planets en el films S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Planets> listaPlanets = PlanetsController.obtenerRegistros(manejador);
-			if (!listaPlanets.isEmpty()) {
-				listaPlanets.stream().forEach(planet -> {
-					planet.setFilmses(films);
-					manejador.session.save(planet);
-				});
-			}
-		}
-	}
+		Set<Vehicles> selectedVehicles = VehiclesController.getVehicles(manejador);
+		if (!selectedStarships.isEmpty())
+			film.setVehicleses(selectedVehicles);
 
-	/**
-	 * Método: Insert films in starships
-	 * 
-	 * @param films
-	 */
-	private void insertStarshipFilms(Set<Films> films) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar starships en el films S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Starships> listaNaves = new ArrayList<Starships>();
-			listaNaves = StarshipsController.obtenerRegistros(manejador);
-			if (!listaNaves.isEmpty()) {
-				listaNaves.stream().forEach(nave -> {
-					nave.setFilmses(films);
-					manejador.session.save(nave);
-				});
-			}
-		}
-	}
+		Set<People> selectedPeople = PeopleController.getPeoples(manejador);
+		if (!selectedPeople.isEmpty())
+			film.setPeoples(selectedPeople);
 
-	/**
-	 * Método: Insert films in vehicles
-	 * 
-	 * @param films
-	 */
-	private void insertVehicleFilms(Set<Films> films) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar vehicles en el films S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Vehicles> listaVehicles = new ArrayList<Vehicles>();
-			listaVehicles = VehiclesController.obtenerRegistros(manejador);
-			if (!listaVehicles.isEmpty()) {
-				listaVehicles.stream().forEach(vehicle -> {
-					vehicle.setFilmses(films);
-					manejador.session.save(vehicle);
-				});
-			}
-		}
+		Set<Planets> selectedPlanets = PlanetsController.getPlanets(manejador);
+		if (!selectedPlanets.isEmpty())
+			film.setPlanetses(selectedPlanets);
+
+		return film;
 	}
 
 	/**
@@ -361,7 +295,7 @@ public class FilmsController implements ICRUDController {
 	 */
 	private Films obtenerDatosModificados(Films films) {
 		boolean valido = false;
-		System.out.println("Ingrese el título de la película: ");
+		System.out.println("Ingrese el título de la Película: ");
 		String titulo = teclado.nextLine();
 		System.out.println("Ingrese el número de episodio");
 		String episodio = teclado.nextLine();
@@ -493,11 +427,30 @@ public class FilmsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Insert film in people
+	 * 
+	 * @param peoples
+	 */
+	public static Set<Films> getFilms(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		Set<Films> listaFilms = new HashSet<Films>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar la Película donde aparece S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaFilms = obtenerRegistrosSet(manejador);
+		}
+		return listaFilms;
+	}
+
+	/**
 	 * Método: Obtiene una lista con todo los registros, método no expuesto
 	 * 
 	 * @return List<Films>
 	 */
-	public static List<Films> obtenerRegistros(HandlerBD manejador) {
+	private static Set<Films> obtenerRegistrosSet(HandlerBD manejador) {
 		List<Films> consultaFilms = new ArrayList<Films>();
 		try {
 			final String sqlQuery = "FROM Films ORDER BY codigo";
@@ -505,7 +458,7 @@ public class FilmsController implements ICRUDController {
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
-		return cargarFilms(consultaFilms);
+		return cargarFilmsSet(consultaFilms);
 	}
 
 	/**
@@ -514,12 +467,10 @@ public class FilmsController implements ICRUDController {
 	 * @param filmsInsertadas
 	 * @return List<Films>
 	 */
-	private static List<Films> cargarFilms(List<Films> filmsInsertadas) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
+	private static Set<Films> cargarFilmsSet(List<Films> filmsInsertadas) {
+
 		Optional<Films> filmsEncontrada = Optional.empty();
-		List<Films> listaFilms = new ArrayList<Films>();
+		Set<Films> listaFilms = new HashSet<Films>();
 		boolean valido = false;
 
 		filmsInsertadas.stream().forEach(Films::imprimeCodValor);
@@ -551,5 +502,4 @@ public class FilmsController implements ICRUDController {
 		} while (!valido);
 		return listaFilms;
 	}
-
 }

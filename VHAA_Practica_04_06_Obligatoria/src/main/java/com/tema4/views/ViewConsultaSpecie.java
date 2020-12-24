@@ -44,7 +44,7 @@ public class ViewConsultaSpecie {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
@@ -54,7 +54,7 @@ public class ViewConsultaSpecie {
 		System.out.println("Opciones de Consulta de Especies: ");
 		System.out.println("1- Buscar especie por nombre");
 		System.out.println("2- Buscar especie sin personajes");
-		System.out.println("3- Mostrar Todas");
+		System.out.println("3- Mostrar todas");
 		System.out.println("0- Volver ");
 	}
 

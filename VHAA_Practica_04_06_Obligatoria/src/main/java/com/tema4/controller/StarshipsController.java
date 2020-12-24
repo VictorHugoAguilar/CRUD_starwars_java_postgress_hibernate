@@ -58,15 +58,12 @@ public class StarshipsController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 
 			Starships starshipToInsert = getStarshipToInsert();
+			starshipToInsert = getRelations(starshipToInsert);
+
 			manejador.session.save(starshipToInsert);
-			Set<Starships> starships = new HashSet<Starships>();
-			starships.add(starshipToInsert);
-
-			insertPeopleStarship(starships);
-			insertFilmStarship(starships);
-
 			trans.commit();
-			System.out.println("registro ingresado...");
+
+			System.out.println("Nave ingresada...");
 			manejador.tearDown();
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
@@ -92,7 +89,7 @@ public class StarshipsController implements ICRUDController {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(starshipEncontrado.get());
 					trans.commit();
-					System.out.println("Starships borrado...");
+					System.out.println("Nave borrada...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -118,15 +115,12 @@ public class StarshipsController implements ICRUDController {
 				Transaction trans = manejador.session.beginTransaction();
 
 				Starships starshipToUpdate = getStarshipToUpdate(starshipEncontrado.get());
-				manejador.session.save(starshipToUpdate);
-				Set<Starships> starships = new HashSet<Starships>();
-				starships.add(starshipToUpdate);
+				starshipToUpdate = getRelations(starshipToUpdate);
 
-				insertPeopleStarship(starships);
-				insertFilmStarship(starships);
-
+				manejador.session.update(starshipToUpdate);
 				trans.commit();
-				System.out.println("registro ingresado...");
+
+				System.out.println("Nave modificada...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -137,47 +131,22 @@ public class StarshipsController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Insert Starships in Films
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param starships
+	 * @param Planets
+	 * @return Planets con la relaciones
 	 */
-	private void insertFilmStarship(Set<Starships> starships) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar films donde aparece S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Films> listaFilms = new ArrayList<Films>();
-			listaFilms = FilmsController.obtenerRegistros(manejador);
-			if (!listaFilms.isEmpty()) {
-				listaFilms.stream().forEach(film -> {
-					film.setCodigo(film.getCodigo());
-					film.setStarshipses(starships);
-					manejador.session.save(film);
-				});
-			}
-		}
-	}
+	private Starships getRelations(Starships starships) {
+		Set<People> selectedPeople = PeopleController.getPeoples(manejador);
+		if (!selectedPeople.isEmpty())
+			starships.setPeoples(selectedPeople);
 
-	/**
-	 * Método: Insert Starships in People
-	 * 
-	 * @param starships
-	 */
-	private void insertPeopleStarship(Set<Starships> starships) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar people que conduce la starship S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<People> listaPeoples = new ArrayList<People>();
-			listaPeoples = PeopleController.obtenerRegistros(manejador);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setStarshipses(starships);
-					manejador.session.save(people);
-				});
-			}
-		}
+		Set<Films> selectedFilms = FilmsController.getFilms(manejador);
+		if (!selectedFilms.isEmpty())
+			starships.setFilmses(selectedFilms);
+
+		return starships;
 	}
 
 	/**
@@ -290,7 +259,7 @@ public class StarshipsController implements ICRUDController {
 
 		boolean valido = false;
 		do {
-			System.out.println("Introduce el código de Starship: ");
+			System.out.println("Introduce el código de Nave: ");
 			final String codigoABorrar = teclado.nextLine();
 
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
@@ -462,11 +431,31 @@ public class StarshipsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Obtenemos una lista Set de Starship seleccionadas
+	 * 
+	 * @param peoples
+	 * @return Set<Starships>
+	 */
+	public static Set<Starships> getStarship(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		Set<Starships> listaNaves = new HashSet<Starships>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar Naves que pilota S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaNaves = obtenerRegistrosSet(manejador);
+		}
+		return listaNaves;
+	}
+
+	/**
 	 * Método: Obtiene una lista de Straships, método expuesto
 	 * 
 	 * @return List<Starships>
 	 */
-	public static List<Starships> obtenerRegistros(HandlerBD manejador) {
+	private static Set<Starships> obtenerRegistrosSet(HandlerBD manejador) {
 		List<Starships> consultaStarships = new ArrayList<Starships>();
 		try {
 			final String sqlQuery = "FROM Starships ORDER BY codigo";
@@ -474,7 +463,7 @@ public class StarshipsController implements ICRUDController {
 		} catch (Exception e) {
 			System.out.println(KConstants.Common.FAIL_CONECTION);
 		}
-		return cargarStarships(consultaStarships);
+		return cargarStarshipsSet(consultaStarships);
 	}
 
 	/**
@@ -484,11 +473,8 @@ public class StarshipsController implements ICRUDController {
 	 * @param StarshipsInsertadas
 	 * @return List<Starships>
 	 */
-	private static List<Starships> cargarStarships(List<Starships> navesInsertadas) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
-		List<Starships> listaNaves = new ArrayList<Starships>();
+	private static Set<Starships> cargarStarshipsSet(List<Starships> navesInsertadas) {
+		Set<Starships> listaNaves = new HashSet<Starships>();
 		Optional<Starships> naveEncontrada = Optional.empty();
 		boolean valido = false;
 

@@ -42,18 +42,18 @@ public class ViewStarships {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de  Starships: ");
+		System.out.println("Opciones de  Naves: ");
 		System.out.println("1- Consultas");
-		System.out.println("2- Insertar starship");
-		System.out.println("3- Modificar starship");
-		System.out.println("4- Borrar starship");
+		System.out.println("2- Insertar nave");
+		System.out.println("3- Modificar nave");
+		System.out.println("4- Borrar nave");
 		System.out.println("0- Volver ");
 	}
 

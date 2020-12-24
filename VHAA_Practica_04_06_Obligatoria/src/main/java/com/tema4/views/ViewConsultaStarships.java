@@ -26,7 +26,7 @@ public class ViewConsultaStarships {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
-				System.out.println("Ingrese el nombre de la Starships a buscar");
+				System.out.println("Ingrese el nombre de la nave a buscar");
 				String name = teclado.nextLine();
 				starshipsController.findbyName(name);
 				presioneTeclaParaContinuar();
@@ -40,16 +40,16 @@ public class ViewConsultaStarships {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de Consultas de Starships: ");
-		System.out.println("1- Buscar Starships por nombre");
-		System.out.println("2- Mostrar Todas");
+		System.out.println("Opciones de Consultas de Naves: ");
+		System.out.println("1- Buscar nave por nombre");
+		System.out.println("2- Mostrar todas");
 		System.out.println("0- Volver ");
 	}
 

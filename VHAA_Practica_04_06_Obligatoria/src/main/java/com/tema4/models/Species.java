@@ -258,7 +258,7 @@ public class Species implements Serializable {
 			peoples += p.getName() + "   ";
 		}
 		if (!peoples.isEmpty()) {
-			sb.append("\nPeoples de esta especie: \n");
+			sb.append("\nPersonajes de esta especie: \n");
 			sb.append(peoples + "\n");
 		}
 		String creado = getCreated();

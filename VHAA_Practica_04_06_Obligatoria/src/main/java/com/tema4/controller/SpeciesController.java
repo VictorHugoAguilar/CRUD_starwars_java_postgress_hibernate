@@ -58,17 +58,12 @@ public class SpeciesController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 
 			Species specieToInsert = getSpecieToInsert();
-
-			insertSpeciePlanet(specieToInsert);
+			specieToInsert = getRelations(specieToInsert);
 
 			manejador.session.save(specieToInsert);
-			Set<Species> species = new HashSet<Species>();
-			species.add(specieToInsert);
-
-			insertSpeciePeople(species);
-
 			trans.commit();
-			System.out.println("registro ingresado...");
+
+			System.out.println("Especie ingresada...");
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
 		} catch (Exception e) {
@@ -94,7 +89,7 @@ public class SpeciesController implements ICRUDController {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(speciesEncontrado.get());
 					trans.commit();
-					System.out.println("Species borrado...");
+					System.out.println("Especie borrada...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -119,17 +114,12 @@ public class SpeciesController implements ICRUDController {
 				Transaction trans = manejador.session.beginTransaction();
 
 				Species specieToUpdate = getSpecieToUpdate(speciesEncontrado.get());
+				specieToUpdate = getRelations(specieToUpdate);
 
-				insertSpeciePlanet(specieToUpdate);
-
-				manejador.session.save(specieToUpdate);
-				Set<Species> species = new HashSet<Species>();
-				species.add(specieToUpdate);
-
-				insertSpeciePeople(species);
-
+				manejador.session.update(specieToUpdate);
 				trans.commit();
-				System.out.println("registro ingresado...");
+
+				System.out.println("Especie modificada...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -140,42 +130,23 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Insert species in peoples
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param species
+	 * @param Planets
+	 * @return Planets con la relaciones
 	 */
-	private void insertSpeciePeople(Set<Species> species) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar people que pertenece a la especie S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<People> listaPeoples = new ArrayList<People>();
-			listaPeoples = PeopleController.obtenerRegistros(manejador);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setSpecieses(species);
-					manejador.session.save(people);
-				});
-			}
-		}
-	}
+	private Species getRelations(Species species) {
+		Set<People> selectedPeople = PeopleController.getPeoples(manejador);
+		if (!selectedPeople.isEmpty())
+			species.setPeoples(selectedPeople);
 
-	/**
-	 * Método: Insert planets in species
-	 * 
-	 * @param specieToInsert
-	 */
-	private void insertSpeciePlanet(Species specieToInsert) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar el planeta de la especie S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			Planets planet = PlanetsController.obtenerRegistro(manejador);
-			if (planet != null) {
-				specieToInsert.setPlanets(planet);
-			}
+		Optional<Planets> selectedPlanet = PlanetsController.getPlanet(manejador);
+		if (selectedPlanet.isPresent()) {
+			species.setPlanets(selectedPlanet.get());
 		}
+
+		return species;
 	}
 
 	/**
@@ -285,7 +256,7 @@ public class SpeciesController implements ICRUDController {
 
 		boolean valido = false;
 		do {
-			System.out.println("Introduce el código de Films: ");
+			System.out.println("Introduce el código de la Película: ");
 			final String codigoABorrar = teclado.nextLine();
 
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
@@ -491,66 +462,6 @@ public class SpeciesController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Obtiene una lista de Species, método expuesto
-	 * 
-	 * @param HandlerBD
-	 */
-	public static List<Species> obtenerRegistros(HandlerBD manejador) {
-		List<Species> consultaSpecies = new ArrayList<Species>();
-		try {
-			final String sqlQuery = "FROM Species ORDER BY codigo";
-			consultaSpecies = manejador.session.createQuery(sqlQuery).list();
-		} catch (Exception e) {
-			System.out.println(KConstants.Common.FAIL_CONECTION);
-		}
-		return cargarEspecies(consultaSpecies);
-	}
-
-	/**
-	 * Método: Carga una lista especies a partir de la lista de especies insertadas
-	 * 
-	 * @param speciesInsertadas
-	 * @return List<Species>
-	 */
-	private static List<Species> cargarEspecies(List<Species> speciesInsertadas) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
-		List<Species> listaSpecies = new ArrayList<Species>();
-		Optional<Species> especieEncontrada = Optional.empty();
-		boolean valido = false;
-
-		speciesInsertadas.stream().forEach(Species::imprimeCodValor);
-
-		do {
-			System.out.println(KConstants.Common.INSERT_CODE);
-			final String codigo = teclado.nextLine();
-			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
-
-			if (valido) {
-				especieEncontrada = speciesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
-						.findAny();
-
-				valido = especieEncontrada.isPresent();
-
-				if (valido) {
-					listaSpecies.add(especieEncontrada.get());
-				} else {
-					System.out.println(KConstants.Common.CODE_NOT_FOUND);
-				}
-
-				System.out.println(KConstants.Common.INSERT_OTHER);
-				String otraNave = teclado.nextLine();
-				valido = !"S".equalsIgnoreCase(otraNave.trim());
-
-			} else {
-				System.out.println(KConstants.Common.INVALID_CODE);
-			}
-		} while (!valido);
-		return listaSpecies;
-	}
-
-	/**
 	 * Método: Carga una especies a partir de la lista de especies insertadas
 	 * 
 	 * @param speciesInsertadas
@@ -588,6 +499,83 @@ public class SpeciesController implements ICRUDController {
 			}
 		} while (!valido);
 		return species;
+	}
+
+	/**
+	 * Método: Insert species in people
+	 * 
+	 * @param peoples
+	 */
+	public static Set<Species> getSpecies(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		Set<Species> listaSpecies = new HashSet<Species>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar Especies en el Personaje S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaSpecies = obtenerRegistrosSet(manejador);
+		}
+		return listaSpecies;
+	}
+
+	/**
+	 * Método: Obtiene una lista de Species, método expuesto
+	 * 
+	 * @param HandlerBD
+	 */
+	private static Set<Species> obtenerRegistrosSet(HandlerBD manejador) {
+		List<Species> consultaSpecies = new ArrayList<Species>();
+		try {
+			final String sqlQuery = "FROM Species ORDER BY codigo";
+			consultaSpecies = manejador.session.createQuery(sqlQuery).list();
+		} catch (Exception e) {
+			System.out.println(KConstants.Common.FAIL_CONECTION);
+		}
+		return cargarEspeciesSet(consultaSpecies);
+	}
+
+	/**
+	 * Método: Carga una lista especies a partir de la lista de especies insertadas
+	 * 
+	 * @param speciesInsertadas
+	 * @return List<Species>
+	 */
+	private static Set<Species> cargarEspeciesSet(List<Species> speciesInsertadas) {
+
+		Set<Species> listaSpecies = new HashSet<Species>();
+		Optional<Species> especieEncontrada = Optional.empty();
+		boolean valido = false;
+
+		speciesInsertadas.stream().forEach(Species::imprimeCodValor);
+
+		do {
+			System.out.println(KConstants.Common.INSERT_CODE);
+			final String codigo = teclado.nextLine();
+			valido = !codigo.trim().isEmpty() && Utiles.isNumeric(codigo);
+
+			if (valido) {
+				especieEncontrada = speciesInsertadas.stream().filter(n -> n.getCodigo() == Integer.valueOf(codigo))
+						.findAny();
+
+				valido = especieEncontrada.isPresent();
+
+				if (valido) {
+					listaSpecies.add(especieEncontrada.get());
+				} else {
+					System.out.println(KConstants.Common.CODE_NOT_FOUND);
+				}
+
+				System.out.println(KConstants.Common.INSERT_OTHER);
+				String otraNave = teclado.nextLine();
+				valido = !"S".equalsIgnoreCase(otraNave.trim());
+
+			} else {
+				System.out.println(KConstants.Common.INVALID_CODE);
+			}
+		} while (!valido);
+		return listaSpecies;
 	}
 
 }

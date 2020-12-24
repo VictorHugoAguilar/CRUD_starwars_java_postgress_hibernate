@@ -247,4 +247,29 @@ public class Utiles {
 		return cadena;
 	}
 
+	public static String getMensajeRelaciones(String nombre, Integer speciePeople, Integer filmsPeople,
+			Integer vehiclesPeople, Integer starshipPeople) {
+		Boolean contiene = false;
+		StringBuilder sb = new StringBuilder();
+		sb.append("Está seguro que quiere eliminar " + nombre + " tiene:\n");
+		if (speciePeople > 0) {
+			sb.append(speciePeople + " especies asociadas\n");
+			contiene = true;
+		}
+		if (filmsPeople > 0) {
+			sb.append(filmsPeople + " películas asociados\n");
+			contiene = true;
+		}
+		if (vehiclesPeople > 0) {
+			sb.append(vehiclesPeople + " vehículos asociados\n");
+			contiene = true;
+		}
+		if (starshipPeople > 0) {
+			sb.append(starshipPeople + " naves asociados\n");
+			contiene = true;
+		}
+		sb.append("Confirme S/N: ");
+		return contiene ? sb.toString() : "";
+	}
+
 }

@@ -265,7 +265,7 @@ public class People implements Serializable {
 
 		String vehicles = "";
 		if (getVehicleses().isEmpty()) {
-			vehicles = "No conduce vehicles";
+			vehicles = "No conduce vehículo";
 		} else {
 			for (Vehicles vehicle : getVehicleses()) {
 				if (!vehicle.getName().trim().isEmpty()) {
@@ -278,7 +278,7 @@ public class People implements Serializable {
 
 		String starships = "";
 		if (getStarshipses().isEmpty()) {
-			starships = "No conduce starships";
+			starships = "No conduce nave";
 		} else {
 			for (Starships st : getStarshipses()) {
 				starships += st.getName() + "   ";
@@ -289,7 +289,7 @@ public class People implements Serializable {
 
 		String films = "";
 		if (getFilmses().isEmpty()) {
-			films = "No ha participado en films";
+			films = "No ha participado en película";
 		} else {
 			for (Films film : getFilmses()) {
 				films += film.getTitle() + "   ";
@@ -337,10 +337,10 @@ public class People implements Serializable {
 		}
 		sb.append("Especie: " + species);
 
-		sb.append("\n\nVehiculos\n");
+		sb.append("\n\nVehículos\n");
 		String vehicles = "";
 		if (getVehicleses().isEmpty()) {
-			vehicles = "No conduce vehicles";
+			vehicles = "No conduce vehículo";
 		} else {
 			for (Vehicles vehicle : getVehicleses()) {
 				vehicles += vehicle.getName() + " ";
@@ -351,7 +351,7 @@ public class People implements Serializable {
 		sb.append("\n\nNaves\n");
 		String starships = "";
 		if (getStarshipses().isEmpty()) {
-			starships = "No conduce starships";
+			starships = "No conduce nave";
 		} else {
 			for (Starships st : getStarshipses()) {
 				starships += st.getName() + " ";
@@ -359,10 +359,10 @@ public class People implements Serializable {
 		}
 		sb.append(starships);
 
-		sb.append("\n\nFilms en los que ha participado\n");
+		sb.append("\n\nPelícula en las que ha participado\n");
 		String films = "";
 		if (getFilmses().isEmpty()) {
-			films = "No ha participado en films";
+			films = "No ha participado en películas";
 		} else {
 			for (Films film : getFilmses()) {
 				films += "Episodio: " + film.getEpisodeId() + " - ";

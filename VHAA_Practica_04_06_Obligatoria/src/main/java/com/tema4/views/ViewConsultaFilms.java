@@ -26,7 +26,7 @@ public class ViewConsultaFilms {
 			String opcion = teclado.nextLine();
 			switch (opcion) {
 			case "1":
-				System.out.println("Ingrese el título del Films a buscar");
+				System.out.println("Ingrese el título de la Película a buscar");
 				String title = teclado.nextLine();
 				filmsController.findbyName(title);
 				presioneTeclaParaContinuar();
@@ -40,16 +40,16 @@ public class ViewConsultaFilms {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de Consultas Films: ");
-		System.out.println("1- Buscar Films por titulo");
-		System.out.println("2- Mostrar Todos");
+		System.out.println("Opciones de Consultas de Películas: ");
+		System.out.println("1- Buscar película por titulo");
+		System.out.println("2- Mostrar todas");
 		System.out.println("0- Volver ");
 	}
 

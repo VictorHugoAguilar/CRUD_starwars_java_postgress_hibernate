@@ -58,16 +58,12 @@ public class PlanetsController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 			Planets planetToInsert = getPlanetToInsert();
 
+			planetToInsert = getRelations(planetToInsert);
+
 			manejador.session.save(planetToInsert);
-			Set<Planets> planets = new HashSet<Planets>();
-			planets.add(planetToInsert);
-
-			insertSpeciesPlanet(planetToInsert);
-			insertPeoplesPlanet(planetToInsert);
-			insertPlanetFilms(planets);
-
 			trans.commit();
-			System.out.println("registro ingresado...");
+
+			System.out.println("Planeta ingresado...");
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
 		} catch (Exception e) {
@@ -93,7 +89,7 @@ public class PlanetsController implements ICRUDController {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(planetsEncontrado.get());
 					trans.commit();
-					System.out.println("Planets borrado...");
+					System.out.println("Planeta borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -118,17 +114,12 @@ public class PlanetsController implements ICRUDController {
 				Transaction trans = manejador.session.beginTransaction();
 
 				Planets planetToUpdate = getPlanetToUpdate(planetsEncontrado.get());
+				planetToUpdate = getRelations(planetToUpdate);
 
-				manejador.session.save(planetToUpdate);
-				Set<Planets> planets = new HashSet<Planets>();
-				planets.add(planetToUpdate);
-
-				insertSpeciesPlanet(planetToUpdate);
-				insertPeoplesPlanet(planetToUpdate);
-				insertPlanetFilms(planets);
-
+				manejador.session.update(planetToUpdate);
 				trans.commit();
-				System.out.println("registro modificado...");
+
+				System.out.println("Planeta modificado...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -139,69 +130,26 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Insertar planets en films
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param planets
+	 * @param Planets
+	 * @return Planets con la relaciones
 	 */
-	private void insertPlanetFilms(Set<Planets> planets) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar films donde aparece S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Films> listaFilms = new ArrayList<Films>();
-			listaFilms = FilmsController.obtenerRegistros(manejador);
-			if (!listaFilms.isEmpty()) {
-				listaFilms.stream().forEach(film -> {
-					film.setCodigo(film.getCodigo());
-					film.setPlanetses(planets);
-					manejador.session.save(film);
-				});
-			}
-		}
-	}
+	private Planets getRelations(Planets planet) {
+		Set<People> selectedPeople = PeopleController.getPeoples(manejador);
+		if (!selectedPeople.isEmpty())
+			planet.setPeoples(selectedPeople);
 
-	/**
-	 * Método: Insertar planets en people
-	 * 
-	 * @param planetToInsert
-	 */
-	private void insertPeoplesPlanet(Planets planetToInsert) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar people en el planet S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<People> listaPeoples = new ArrayList<People>();
-			listaPeoples = PeopleController.obtenerRegistros(manejador);
-			if (!listaPeoples.isEmpty()) {
-				listaPeoples.stream().forEach(people -> {
-					people.setCodigo(people.getCodigo());
-					people.setPlanets(planetToInsert);
-					manejador.session.save(people);
-				});
-			}
-		}
-	}
+		Set<Films> selectedFilms = FilmsController.getFilms(manejador);
+		if (!selectedFilms.isEmpty())
+			planet.setFilmses(selectedFilms);
 
-	/**
-	 * Método: Insertar planets en especies
-	 * 
-	 * @param planetToInsert
-	 */
-	private void insertSpeciesPlanet(Planets planetToInsert) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar especies que pertenece al planet S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Species> listaSpecies = new ArrayList<Species>();
-			listaSpecies = SpeciesController.obtenerRegistros(manejador);
-			if (!listaSpecies.isEmpty()) {
-				listaSpecies.stream().forEach(specie -> {
-					specie.setCodigo(specie.getCodigo());
-					specie.setPlanets(planetToInsert);
-					manejador.session.save(specie);
-				});
-			}
-		}
+		Set<Species> selectedSpecies = SpeciesController.getSpecies(manejador);
+		if (!selectedSpecies.isEmpty())
+			planet.setSpecieses(selectedSpecies);
+
+		return planet;
 	}
 
 	/**
@@ -472,11 +420,27 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Insert films in planets
+	 * 
+	 * @param films
+	 */
+	public static Set<Planets> getPlanets(HandlerBD manejador) {
+		Set<Planets> listaPlanets = new HashSet<Planets>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar Planetas S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaPlanets = obtenerRegistros(manejador);
+		}
+		return listaPlanets;
+	}
+
+	/**
 	 * Método: Obtener una lista de registro
 	 * 
 	 * @return List<Planets>
 	 */
-	public static List<Planets> obtenerRegistros(HandlerBD manejador) {
+	private static Set<Planets> obtenerRegistros(HandlerBD manejador) {
 		List<Planets> consultaPlanets = new ArrayList<Planets>();
 		try {
 			final String sqlQuery = "FROM Planets ORDER BY codigo";
@@ -494,11 +458,11 @@ public class PlanetsController implements ICRUDController {
 	 * @param planetsInsertados
 	 * @return List<Planets>
 	 */
-	private static List<Planets> cargarPlanets(List<Planets> planetsInsertados) {
+	private static Set<Planets> cargarPlanets(List<Planets> planetsInsertados) {
 		if (teclado == null) {
 			teclado = new Scanner(System.in);
 		}
-		List<Planets> listPlanets = new ArrayList<Planets>();
+		Set<Planets> listPlanets = new HashSet<Planets>();
 		Optional<Planets> planetEncontrado = Optional.empty();
 		boolean valido = false;
 
@@ -533,11 +497,31 @@ public class PlanetsController implements ICRUDController {
 	}
 
 	/**
+	 * Método: Insert planet in people
+	 * 
+	 * @param peopleToInsert
+	 */
+	public static Optional<Planets> getPlanet(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+
+		Optional<Planets> planet = Optional.empty();
+		String deseaIngresar;
+		System.out.println("Desea ingresar el Planeta del Personaje S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			planet = Optional.of(obtenerRegistro(manejador));
+		}
+		return planet;
+	}
+
+	/**
 	 * Método: Obtener una lista de registro
 	 * 
 	 * @return List<Planets>
 	 */
-	public static Planets obtenerRegistro(HandlerBD manejador) {
+	private static Planets obtenerRegistro(HandlerBD manejador) {
 		List<Planets> consultaPlanets = new ArrayList<Planets>();
 		try {
 			final String sqlQuery = "FROM Planets ORDER BY codigo";
@@ -556,9 +540,7 @@ public class PlanetsController implements ICRUDController {
 	 * @return Planets
 	 */
 	private static Planets cargarPlanet(List<Planets> planetsInsertados) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
+
 		Optional<Planets> planetEncontrado = Optional.empty();
 		Planets planets = new Planets();
 		boolean valido = false;

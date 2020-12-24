@@ -231,7 +231,7 @@ public class Films implements Serializable {
 			i++;
 		}
 		if (!personajes.isEmpty()) {
-			sb.append("\nPersonajes del films: \n");
+			sb.append("\nPersonajes de la película: \n");
 			sb.append(personajes + "\n");
 		}
 		String starships = "";
@@ -239,7 +239,7 @@ public class Films implements Serializable {
 			starships += s.getName() + "   ";
 		}
 		if (!starships.isEmpty()) {
-			sb.append("\nStarships en el film: \n");
+			sb.append("\nNaves en la película: \n");
 			sb.append(starships + "\n");
 		}
 		String vehicles = "";
@@ -247,7 +247,7 @@ public class Films implements Serializable {
 			vehicles += v.getName() + "   ";
 		}
 		if (!vehicles.isEmpty()) {
-			sb.append("\nVehicles en el film: \n");
+			sb.append("\nVehículos en la película: \n");
 			sb.append(vehicles + "\n");
 		}
 		String planets = "";
@@ -255,7 +255,7 @@ public class Films implements Serializable {
 			planets += p.getName() + "   ";
 		}
 		if (!planets.isEmpty()) {
-			sb.append("\nPlanets en el film: \n");
+			sb.append("\nPlanetas en la película: \n");
 			sb.append(planets + "\n");
 		}
 		sb.append(String.format("%-50s", "\nCreado: " + creado) + "\n");

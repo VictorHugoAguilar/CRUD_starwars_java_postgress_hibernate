@@ -42,18 +42,18 @@ public class ViewFilms {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
 	}
 
 	private void showMenu() {
-		System.out.println("Opciones de Films: ");
+		System.out.println("Opciones de Películas: ");
 		System.out.println("1- Consultas");
-		System.out.println("2- Insertar film");
-		System.out.println("3- Modificar film");
-		System.out.println("4- Borrar film");
+		System.out.println("2- Insertar película");
+		System.out.println("3- Modificar película");
+		System.out.println("4- Borrar película");
 		System.out.println("0- Volver ");
 	}
 

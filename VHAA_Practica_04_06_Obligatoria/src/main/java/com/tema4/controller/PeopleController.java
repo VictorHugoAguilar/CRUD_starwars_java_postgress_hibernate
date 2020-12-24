@@ -61,20 +61,12 @@ public class PeopleController implements ICRUDController {
 			Transaction trans = manejador.session.beginTransaction();
 
 			People peopleToInsert = getPeopleToInsert();
-
-			insertPlanetPeople(peopleToInsert);
+			peopleToInsert = getRelations(peopleToInsert);
 
 			manejador.session.save(peopleToInsert);
-			Set<People> peoples = new HashSet<People>();
-			peoples.add(peopleToInsert);
-
-			insertStarshipPeople(peoples);
-			insertVehiclesPeople(peoples);
-			insertSpeciePeople(peoples);
-			insertFilmPeople(peoples);
-
 			trans.commit();
-			System.out.println("registro ingresado...");
+
+			System.out.println("Personaje ingresado...");
 		} catch (PersistenceException e) {
 			System.err.println("Fallo en el insert en la BD");
 		} catch (Exception e) {
@@ -94,13 +86,23 @@ public class PeopleController implements ICRUDController {
 			Optional<People> peopleEncontrado = getPeopleFromInserts();
 
 			if (peopleEncontrado.isPresent()) {
-				System.out.println(KConstants.Common.ARE_YOU_SURE);
+				Integer speciePeople = peopleEncontrado.get().getSpecieses().size();
+				Integer filmsPeople = peopleEncontrado.get().getFilmses().size();
+				Integer vehiclesPeople = peopleEncontrado.get().getVehicleses().size();
+				Integer starshipPeople = peopleEncontrado.get().getStarshipses().size();
+				String mensajeRelaciones = Utiles.getMensajeRelaciones(peopleEncontrado.get().getName(), speciePeople,
+						filmsPeople, vehiclesPeople, starshipPeople);
+				if (mensajeRelaciones.trim().isEmpty()) {
+					System.out.println(KConstants.Common.ARE_YOU_SURE);
+				} else {
+					System.out.println(mensajeRelaciones);
+				}
 				String seguro = teclado.nextLine();
 				if ("S".equalsIgnoreCase(seguro.trim())) {
 					Transaction trans = manejador.session.beginTransaction();
 					manejador.session.delete(peopleEncontrado.get());
 					trans.commit();
-					System.out.println("People borrado...");
+					System.out.println("Personaje borrado...");
 				}
 			}
 		} catch (PersistenceException e) {
@@ -125,20 +127,12 @@ public class PeopleController implements ICRUDController {
 				Transaction trans = manejador.session.beginTransaction();
 
 				People peopleToUpdate = getPeopleToUpdate(peopleEncontrado.get());
+				peopleToUpdate = getRelations(peopleToUpdate);
 
-				insertPlanetPeople(peopleToUpdate);
-
-				manejador.session.save(peopleToUpdate);
-				Set<People> peoples = new HashSet<People>();
-				peoples.add(peopleToUpdate);
-
-				insertStarshipPeople(peoples);
-				insertVehiclesPeople(peoples);
-				insertSpeciePeople(peoples);
-				insertFilmPeople(peoples);
-
+				manejador.session.update(peopleToUpdate);
 				trans.commit();
-				System.out.println("registro modificado...");
+
+				System.out.println("Personaje modificado...");
 			}
 		} catch (PersistenceException e) {
 			System.err.println("Error en la consulta de actualización a la BD");
@@ -149,105 +143,34 @@ public class PeopleController implements ICRUDController {
 	}
 
 	/**
-	 * Método: Insert film in people
+	 * Método: inserta o actualiza las relaciones con el objeto pasado por el
+	 * parámetro
 	 * 
-	 * @param peoples
+	 * @param People
+	 * @return People con la relaciones
 	 */
-	private void insertFilmPeople(Set<People> peoples) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar films donde aparece S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Films> listaFilms = new ArrayList<Films>();
-			listaFilms = FilmsController.obtenerRegistros(manejador);
-			if (!listaFilms.isEmpty()) {
-				listaFilms.stream().forEach(film -> {
-					film.setCodigo(film.getCodigo());
-					film.setPeoples(peoples);
-					manejador.session.save(film);
-				});
-			}
-		}
-	}
+	private People getRelations(People people) {
+		Set<Starships> selectedStarships = StarshipsController.getStarship(manejador);
+		if (!selectedStarships.isEmpty())
+			people.setStarshipses(selectedStarships);
 
-	/**
-	 * Método: Insert species in people
-	 * 
-	 * @param peoples
-	 */
-	private void insertSpeciePeople(Set<People> peoples) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar especies en el people S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Species> listaSpecies = new ArrayList<Species>();
-			listaSpecies = SpeciesController.obtenerRegistros(manejador);
-			if (!listaSpecies.isEmpty()) {
-				listaSpecies.stream().forEach(specie -> {
-					specie.setPeoples(peoples);
-					manejador.session.save(specie);
-				});
-			}
-		}
-	}
+		Set<Vehicles> selectedVehicles = VehiclesController.getVehicles(manejador);
+		if (!selectedVehicles.isEmpty())
+			people.setVehicleses(selectedVehicles);
 
-	/**
-	 * Método: Insert vehicles in people
-	 * 
-	 * @param peoples
-	 */
-	private void insertVehiclesPeople(Set<People> peoples) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar vehicles que conduce S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Vehicles> listaVehicles = new ArrayList<Vehicles>();
-			listaVehicles = VehiclesController.obtenerRegistros(manejador);
-			if (!listaVehicles.isEmpty()) {
-				listaVehicles.stream().forEach(vehicle -> {
-					vehicle.setPeoples(peoples);
-					manejador.session.save(vehicle);
-				});
-			}
-		}
-	}
+		Set<Films> selectedFilms = FilmsController.getFilms(manejador);
+		if (!selectedFilms.isEmpty())
+			people.setFilmses(selectedFilms);
 
-	/**
-	 * Método: Insert starships in people
-	 * 
-	 * @param peoples
-	 */
-	private void insertStarshipPeople(Set<People> peoples) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar starships que conduce S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			List<Starships> listaNaves = new ArrayList<Starships>();
-			listaNaves = StarshipsController.obtenerRegistros(manejador);
-			if (!listaNaves.isEmpty()) {
-				listaNaves.stream().forEach(nave -> {
-					nave.setPeoples(peoples);
-					manejador.session.save(nave);
-				});
-			}
-		}
-	}
+		Set<Species> selectedSpecies = SpeciesController.getSpecies(manejador);
+		if (!selectedSpecies.isEmpty())
+			people.setSpecieses(selectedSpecies);
 
-	/**
-	 * Método: Insert planet in people
-	 * 
-	 * @param peopleToInsert
-	 */
-	private void insertPlanetPeople(People peopleToInsert) {
-		String deseaIngresar;
-		System.out.println("Desea ingresar el planeta del people S/N: ");
-		deseaIngresar = teclado.nextLine();
-		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
-			Planets planet = PlanetsController.obtenerRegistro(manejador);
-			if (planet != null) {
-				peopleToInsert.setPlanets(planet);
-			}
+		Optional<Planets> selectedPlanet = PlanetsController.getPlanet(manejador);
+		if (selectedPlanet.isPresent()) {
+			people.setPlanets(selectedPlanet.get());
 		}
+		return people;
 	}
 
 	/**
@@ -261,7 +184,7 @@ public class PeopleController implements ICRUDController {
 		boolean valido = false;
 		String nombre = "";
 		do {
-			System.out.println("Ingrese el nombre de la people(obligatorio): ");
+			System.out.println("Ingrese el nombre del personaje(obligatorio): ");
 			nombre = teclado.nextLine();
 
 			valido = !nombre.trim().isEmpty();
@@ -309,7 +232,7 @@ public class PeopleController implements ICRUDController {
 	 * @return People
 	 */
 	private People getPeopleToUpdate(People people) {
-		System.out.println("Ingrese el nombre de la people: ");
+		System.out.println("Ingrese el nombre del personaje: ");
 		String nombre = teclado.nextLine();
 		System.out.println("Ingrese la fecha de nacimiento: ");
 		String fechaNacimiento = teclado.nextLine();
@@ -361,7 +284,7 @@ public class PeopleController implements ICRUDController {
 
 		boolean valido = false;
 		do {
-			System.out.println("Introduce el código de People: ");
+			System.out.println("Introduce el código de Personaje: ");
 			final String codigoABorrar = teclado.nextLine();
 
 			if (!codigoABorrar.trim().isEmpty() && Utiles.isNumeric(codigoABorrar)) {
@@ -438,7 +361,7 @@ public class PeopleController implements ICRUDController {
 			if (consultaPeople.isEmpty()) {
 				System.out.println(KConstants.Common.NOT_REGISTER);
 			} else {
-				System.out.println("Los personajes que no tienen especies son");
+				System.out.println("Los Personajes que no tienen Especies son: ");
 				consultaPeople.stream().forEach(People::imprimeCodValor);
 			}
 		} catch (Exception e) {
@@ -472,7 +395,7 @@ public class PeopleController implements ICRUDController {
 				System.out.println(KConstants.Common.NOT_REGISTER);
 			} else {
 				masVeces = tuplas.get(0)[1].toString();
-				System.out.println("El/los siguientes personaje/s han participado en " + masVeces + " films.");
+				System.out.println("El/los siguientes Personaje/s han participado en " + masVeces + " películas.");
 
 				for (int i = 0; i < tuplas.size(); i++) {
 					String nombrePeople = tuplas.get(i)[0].toString();
@@ -574,11 +497,30 @@ public class PeopleController implements ICRUDController {
 	}
 
 	/**
+	 * Método:Insert films in peoples
+	 * 
+	 * @param films
+	 */
+	public static Set<People> getPeoples(HandlerBD manejador) {
+		if (teclado == null) {
+			teclado = new Scanner(System.in);
+		}
+		Set<People> listaPeoples = new HashSet<People>();
+		String deseaIngresar;
+		System.out.println("Desea ingresar Personaje S/N: ");
+		deseaIngresar = teclado.nextLine();
+		if ("S".equalsIgnoreCase(deseaIngresar.trim())) {
+			listaPeoples = obtenerRegistros(manejador);
+		}
+		return listaPeoples;
+	}
+
+	/**
 	 * Método: Obtiene la lista de todos los peoples almacenados, método no expuesto
 	 * 
 	 * @return List<People>
 	 */
-	public static List<People> obtenerRegistros(HandlerBD manejador) {
+	private static Set<People> obtenerRegistros(HandlerBD manejador) {
 		List<People> consultaPeople = new ArrayList<People>();
 		try {
 			final String sqlQuery = "FROM People ORDER BY codigo";
@@ -595,11 +537,8 @@ public class PeopleController implements ICRUDController {
 	 * @param peoplesInsertadas
 	 * @return List<People>
 	 */
-	private static List<People> cargarPeoples(List<People> peoplesInsertadas) {
-		if (teclado == null) {
-			teclado = new Scanner(System.in);
-		}
-		List<People> listaPeoples = new ArrayList<People>();
+	private static Set<People> cargarPeoples(List<People> peoplesInsertadas) {
+		Set<People> listaPeoples = new HashSet<People>();
 		Optional<People> peopleEncontrada = Optional.empty();
 		boolean valido = false;
 

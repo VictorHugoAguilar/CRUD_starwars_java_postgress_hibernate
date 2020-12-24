@@ -40,7 +40,7 @@ public class ViewConsultaVehicles {
 				terminado = true;
 				break;
 			default:
-				System.out.println("Ingrese una opcion válida");
+				System.out.println("Ingrese una opción válida");
 				break;
 			}
 		} while (!terminado);
@@ -49,7 +49,7 @@ public class ViewConsultaVehicles {
 	private void showMenu() {
 		System.out.println("Opciones de Consulta de Vehículos: ");
 		System.out.println("1- Buscar Vehículo por nombre");
-		System.out.println("2- Mostrar Todas");
+		System.out.println("2- Mostrar todos");
 		System.out.println("0- Volver ");
 	}
 
